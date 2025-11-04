@@ -133,8 +133,8 @@ const JobCard = ({ item , goback ,params, onApplied }) => {
           </View>
           <View style={styles.thirdcontainer}>
             <View style={styles.thirdsubcontainer}>
-              <Text style={styles.post}>{item.job_category?.category_name}</Text>
-              <Text style={styles.post}>{item.job_type?.job_type_name}</Text>
+              {item?.job_category?.category_name && <Text style={styles.post}>{item.job_category?.category_name}</Text>}
+              {item?.job_type?.job_type_name && <Text style={styles.post}>{item.job_type?.job_type_name}</Text>}
             </View>
           </View>
         </TouchableOpacity>

@@ -62,12 +62,12 @@ const UserJobCard = ({ item }) => {
           <Text style={styles.jobtitle}>{item.title}</Text>
           <View style={styles.thirdcontainer}>
             <View style={styles.thirdsubcontainer}>
-              <Text style={styles.post}><Text style={styles.post}>
+              {item?.job_category?.category_name &&<Text style={styles.post}><Text style={styles.post}>
                 {item.job_category?.category_name.length > 20
                   ? `${item.job_category?.category_name.slice(0, 20)}...`
                   : item.job_category?.category_name}
-              </Text></Text>
-              <Text style={styles.post}>{item.job_type?.job_type_name}</Text>
+              </Text></Text>}
+              {item?.job_type?.job_type_name &&<Text style={styles.post}>{item.job_type?.job_type_name}</Text>}
             </View>
           </View>
           <View>

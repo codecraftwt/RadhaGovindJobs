@@ -36,7 +36,7 @@ export default function InstituteCandidate() {
     if (searchQuery.trim() === '') {
       setFilteredCandidates(candidates);
     } else {
-      const filteredData = filteredCandidates?.filter(candidate => {
+      const filteredData = candidates?.filter(candidate => {
         const firstName = candidate?.fname?.toLowerCase() || '';
         const lastName = candidate?.lname?.toLowerCase() || '';
         const fullName = `${firstName} ${lastName}`;
