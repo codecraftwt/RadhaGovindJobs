@@ -1,4 +1,4 @@
-package com.radhagovindjobs
+package com.gramjobmobile
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
