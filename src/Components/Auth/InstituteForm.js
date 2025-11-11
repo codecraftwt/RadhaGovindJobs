@@ -15,6 +15,8 @@ import { globalColors } from '../../Theme/globalColors';
 import { h, w, f } from 'walstar-rn-responsive';
 import LocationFields from './LocationFields';
 import { validateForm } from './validations';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 
 const InstituteForm = ({
   formData,
@@ -41,6 +43,17 @@ const InstituteForm = ({
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateField, setDateField] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
 
   const handleSubmit = () => {
     const errors = validateForm(formData, 'institute');
@@ -108,24 +121,49 @@ const InstituteForm = ({
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showPassword}
           value={formData.password}
-          onChangeText={(text) => onInputChange('password', text)}
+          onChangeText={text => onInputChange('password', text)}
         />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={togglePasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
       </View>
 
+    {/* Confirm Password Field - Fixed */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Confirm Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showConfirmPassword}
           value={formData.confirm_password}
-          onChangeText={(text) => onInputChange('confirm_password', text)}
+          onChangeText={text => onInputChange('confirm_password', text)}
         />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={toggleConfirmPasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showConfirmPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
         <Text style={styles.hintText}>(Minimum 6 characters)</Text>
       </View>
 
@@ -496,6 +534,15 @@ const styles = StyleSheet.create({
     color: globalColors.white,
     fontSize: f(2),
     fontFamily: 'BaiJamjuree-SemiBold',
+  },
+  passwordInputContainer: {
+    position: 'relative',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: w(4),
+    top: h(1.5),
+    zIndex: 1,
   },
 });
 

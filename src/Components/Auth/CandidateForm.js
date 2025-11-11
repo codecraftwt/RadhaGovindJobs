@@ -19,6 +19,7 @@ import LocationFields from './LocationFields';
 import { validateForm } from './validations';
 import { useNavigation } from '@react-navigation/native';
 import DocumentUpload from '../DocumentUpload';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const CandidateForm = ({
   formData,
@@ -57,6 +58,8 @@ const CandidateForm = ({
   const [skills, setSkills] = useState([]);
   const [loadingJobCategories, setLoadingJobCategories] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigation = useNavigation();
 
   const [dropdownLayouts, setDropdownLayouts] = useState({
@@ -109,6 +112,14 @@ const CandidateForm = ({
       fetchSkills(formData.job_category);
     }
   }, [formData.job_category]);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const fetchJobCategories = async () => {
     try {
@@ -178,61 +189,86 @@ const CandidateForm = ({
       return;
     }
 
-    // Prepare API payload according to the curl example
-    const apiPayload = {
-      user_id: 1, // You might want to get this from auth context
-      fname: formData.fname,
-      middle_name: formData.middle_name || '',
-      lname: formData.lname,
-      email: formData.email,
-      password: formData.password,
-      profession: formData.profession || '',
-      min_experience: parseInt(formData.min_experience) || 0,
-      max_experience: parseInt(formData.max_experience) || 0,
-      state_id: parseInt(formData.state_id) || 0,
-      district_id: parseInt(formData.district_id) || 0,
-      taluka_id: parseInt(formData.taluka_id) || 0,
-      village_id: parseInt(formData.village_id) || 0,
-      zipcode: formData.zipcode || '',
-      dob: formData.dob || '',
-      gender: formData.gender || '',
-      phone: formData.phone,
-      contact_number_2: formData.contact_number_2 || '',
-      address_line_1: formData.address_line_1 || '',
-      address_line_2: formData.address_line_2 || '',
-      latitude: formData.latitude || '',
-      longitude: formData.longitude || '',
-      aadhar_no: formData.aadhar_no || '',
-      pancard_no: formData.pancard_no || '',
-      blood_group: formData.blood_group || '',
-      job_location: formData.job_location || '',
-      passout_year: formData.passout_year || '',
-      college_name: formData.college_name || '',
-      job_category_id: formData.job_category ? [parseInt(formData.job_category)] : [],
-      description: formData.description || '',
-      education: formData.qualification ? [1] : [], // You might need to map qualifications to education IDs
-      skill: formData.skills ? formData.skills.split(',').map(skill => parseInt(skill)) : [],
-      resume: formData.resume ? formData.resume.data : '', // Base64 data from DocumentUpload
-      profile: formData.profile ? formData.profile.data : ''
-    };
+    // Prepare form data according to the curl example
+    const formDataToSend = new FormData();
+
+    // Add all fields according to the curl example
+    formDataToSend.append('role_id', '2'); // Candidate role
+    formDataToSend.append('fname', formData.fname);
+    formDataToSend.append('middle_name', formData.middle_name || '');
+    formDataToSend.append('lname', formData.lname);
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('password', formData.password);
+    formDataToSend.append('contact_number_1', formData.phone);
+    formDataToSend.append('dob', formData.dob || '');
+    
+    // Address fields
+    formDataToSend.append('address_line_1', formData.address_line_1 || '');
+    formDataToSend.append('address_line_2', formData.address_line_2 || '');
+    formDataToSend.append('state_id', formData.state_id?.toString() || '');
+    formDataToSend.append('district_id', formData.district_id?.toString() || '');
+    formDataToSend.append('taluka_id', formData.taluka_id?.toString() || '');
+    formDataToSend.append('village_id', formData.village_id?.toString() || '');
+    formDataToSend.append('zipcode', formData.zipcode || '');
+
+    // Additional fields from your existing form
+    formDataToSend.append('contact_number_2', formData.contact_number_2 || '');
+    formDataToSend.append('gender', formData.gender || '');
+    formDataToSend.append('blood_group', formData.blood_group || '');
+    formDataToSend.append('aadhar_no', formData.aadhar_no || '');
+    formDataToSend.append('pancard_no', formData.pancard_no || '');
+    formDataToSend.append('profession', formData.profession || '');
+    formDataToSend.append('description', formData.description || '');
+    formDataToSend.append('college_name', formData.college_name || '');
+    formDataToSend.append('passout_year', formData.passout_year || '');
+    formDataToSend.append('qualification', formData.qualification || '');
+    formDataToSend.append('job_category_id', formData.job_category || '');
+    formDataToSend.append('min_experience', formData.min_experience || '0');
+    formDataToSend.append('max_experience', formData.max_experience || '0');
+    formDataToSend.append('job_location', formData.job_location || '');
+    
+    // Skills - convert array to string if needed
+    if (formData.skills) {
+      const skillsArray = Array.isArray(formData.skills) 
+        ? formData.skills 
+        : formData.skills.split(',');
+      skillsArray.forEach(skill => {
+        formDataToSend.append('skill[]', skill);
+      });
+    }
+
+    // File uploads
+    if (formData.profile && formData.profile.path) {
+      formDataToSend.append('profile', {
+        uri: formData.profile.path,
+        type: formData.profile.type || 'image/jpeg',
+        name: formData.profile.filename || 'profile.jpg'
+      });
+    }
+
+    if (formData.resume && formData.resume.path) {
+      formDataToSend.append('resume', {
+        uri: formData.resume.path,
+        type: formData.resume.type || 'application/pdf',
+        name: formData.resume.filename || 'resume.pdf'
+      });
+    }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/candidates`, {
+      console.log("url",`${API_BASE_URL}/registration`)
+      const response = await fetch(`${API_BASE_URL}/registration`, {
         method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': AUTH_TOKEN,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiPayload),
+        body: formDataToSend,
       });
 
+      const result = await response.json();
+
+      console.log("result",result)
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
+        throw new Error(result.message || 'Registration failed');
       }
 
-      const result = await response.json();
       Alert.alert('Success', 'Candidate registration successful!');
       navigation.navigate('Login');
       console.log('Registration successful:', result);
@@ -457,24 +493,49 @@ const CandidateForm = ({
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showPassword}
           value={formData.password}
           onChangeText={text => onInputChange('password', text)}
         />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={togglePasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
       </View>
 
+    {/* Confirm Password Field - Fixed */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Confirm Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showConfirmPassword}
           value={formData.confirm_password}
           onChangeText={text => onInputChange('confirm_password', text)}
         />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={toggleConfirmPasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showConfirmPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
         <Text style={styles.hintText}>(Minimum 6 characters)</Text>
       </View>
 
@@ -887,14 +948,13 @@ const CandidateForm = ({
         <Text style={styles.label}>Resume Upload *</Text>
         <DocumentUpload 
           type="Upload Resume" 
-          onUploadComplete={(base64Data, fileInfo) => {
-            console.log('Resume uploaded:', fileInfo.name);
+          onUploadComplete={(fileInfo) => {
+            console.log('Resume uploaded:', fileInfo);
             onInputChange('resume', {
-              data: base64Data,
+              path: fileInfo.uri,
               filename: fileInfo.name,
               size: fileInfo.size,
-              type: fileInfo.type,
-              path: fileInfo.uri
+              type: fileInfo.type
             });
           }}
           onRemove={() => {
@@ -909,7 +969,7 @@ const CandidateForm = ({
         )}
       </View>
 
-      {/* Profile Photo Upload (keep the existing one) */}
+      {/* Profile Photo Upload */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Profile Photo Upload</Text>
         <TouchableOpacity
@@ -1198,6 +1258,15 @@ const styles = StyleSheet.create({
     color: globalColors.white,
     fontSize: f(1.8),
     fontFamily: 'BaiJamjuree-SemiBold',
+  },
+  passwordInputContainer: {
+    position: 'relative',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: w(4),
+    top: h(1.5),
+    zIndex: 1,
   },
 });
 

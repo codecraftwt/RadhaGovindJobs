@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import LinearGradient from 'react-native-linear-gradient';
@@ -15,6 +16,9 @@ import { globalColors } from '../../Theme/globalColors';
 import { h, w, f } from 'walstar-rn-responsive';
 import LocationFields from './LocationFields';
 import { validateForm } from './validations';
+import { useNavigation } from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 
 const ConsultantForm = ({
   formData,
@@ -36,13 +40,26 @@ const ConsultantForm = ({
   onMeasureDropdown,
   getSelectedName,
   onImagePicker,
-  onSubmit,
   isLoading,
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateField, setDateField] = useState('');
+  const [apiLoading, setApiLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+  const navigation = useNavigation();
 
-  const handleSubmit = () => {
+  const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const handleSubmit = async () => {
     const errors = validateForm(formData, 'consultant');
     
     if (Object.keys(errors).length > 0) {
@@ -50,7 +67,76 @@ const ConsultantForm = ({
       return;
     }
 
-    onSubmit(formData);
+    await registerConsultant();
+  };
+
+  const registerConsultant = async () => {
+    try {
+      setApiLoading(true);
+
+      // Prepare form data according to the curl example
+      const formDataToSend = new FormData();
+
+      // Add all fields according to the curl example structure
+      formDataToSend.append('role_id', '3'); // Consultant role (assuming 3 is for consultants)
+      formDataToSend.append('fname', formData.name); // Using name as fname
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('contact_number_1', formData.phone);
+      
+      // Address fields
+      formDataToSend.append('address_line_1', formData.address_line_1 || '');
+      formDataToSend.append('address_line_2', formData.address_line_2 || '');
+      formDataToSend.append('state_id', formData.state_id?.toString() || '');
+      formDataToSend.append('district_id', formData.district_id?.toString() || '');
+      formDataToSend.append('taluka_id', formData.taluka_id?.toString() || '');
+      formDataToSend.append('village_id', formData.village_id?.toString() || '');
+      formDataToSend.append('zipcode', formData.zipcode || '');
+
+      // Additional consultant-specific fields
+      formDataToSend.append('contact_number_2', formData.contact_number_2 || '');
+      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('website_url', formData.website_url || '');
+      formDataToSend.append('registered_date', formData.established_date || new Date().toISOString().split('T')[0]);
+      formDataToSend.append('gst_no', formData.gst_no || '');
+
+      // File uploads
+      if (formData.profile_logo && formData.profile_logo.path) {
+        formDataToSend.append('profile', {
+          uri: formData.profile_logo.path,
+          type: formData.profile_logo.type || 'image/jpeg',
+          name: formData.profile_logo.filename || 'profile_logo.jpg'
+        });
+      }
+
+      console.log('Sending consultant registration data...');
+
+      const response = await fetch(`${API_BASE_URL}/registration`, {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      const responseData = await response.json();
+      console.log("Registration response:", responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      if (responseData.status) {
+        Alert.alert('Success', 'Consultant registration successful!');
+        navigation.navigate('Login');
+        console.log('Registration successful:', responseData);
+      } else {
+        throw new Error(responseData.message || 'Registration failed');
+      }
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', error.message || 'Registration failed. Please try again.');
+    } finally {
+      setApiLoading(false);
+    }
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -70,9 +156,10 @@ const ConsultantForm = ({
     if (!dateString) return 'dd-mm-yyyy';
     return new Date(dateString).toLocaleDateString('en-IN');
   };
+  const isSubmitLoading = isLoading || apiLoading;
 
   return (
-    <View>
+    <ScrollView showsVerticalScrollIndicator={false}>
       <Text style={styles.formTitle}>Consultant Registration</Text>
       
       <View style={styles.inputContainer}>
@@ -97,28 +184,54 @@ const ConsultantForm = ({
         />
       </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Password *</Text>
+    {/* Password Field - Fixed */}
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showPassword}
           value={formData.password}
-          onChangeText={(text) => onInputChange('password', text)}
+          onChangeText={text => onInputChange('password', text)}
         />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={togglePasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
       </View>
+    </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Confirm Password *</Text>
+    {/* Confirm Password Field - Fixed */}
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>Confirm Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showConfirmPassword}
           value={formData.confirm_password}
-          onChangeText={(text) => onInputChange('confirm_password', text)}
+          onChangeText={text => onInputChange('confirm_password', text)}
         />
-        <Text style={styles.hintText}>(Minimum 6 characters)</Text>
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={toggleConfirmPasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showConfirmPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
       </View>
+      <Text style={styles.hintText}>(Minimum 6 characters)</Text>
+    </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Established Date</Text>
@@ -175,6 +288,16 @@ const ConsultantForm = ({
           placeholder="Enter address line 1"
           value={formData.address_line_1}
           onChangeText={(text) => onInputChange('address_line_1', text)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Address Line 2</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter address line 2"
+          value={formData.address_line_2}
+          onChangeText={(text) => onInputChange('address_line_2', text)}
         />
       </View>
 
@@ -263,7 +386,7 @@ const ConsultantForm = ({
       <TouchableOpacity 
         style={styles.submitButton}
         onPress={handleSubmit}
-        disabled={isLoading}
+        disabled={isSubmitLoading}
       >
         <LinearGradient
           colors={[globalColors.purplegradient1, globalColors.purplegradient2]}
@@ -271,7 +394,7 @@ const ConsultantForm = ({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
-          {isLoading ? (
+          {isSubmitLoading ? (
             <ActivityIndicator color={globalColors.white} />
           ) : (
             <Text style={styles.submitButtonText}>Register as Consultant</Text>
@@ -288,7 +411,7 @@ const ConsultantForm = ({
           maximumDate={new Date()}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -443,6 +566,15 @@ const styles = StyleSheet.create({
     color: globalColors.white,
     fontSize: f(2),
     fontFamily: 'BaiJamjuree-SemiBold',
+  },
+  passwordInputContainer: {
+    position: 'relative',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: w(4),
+    top: h(1.5),
+    zIndex: 1,
   },
 });
 

@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ScrollView,
+  Modal,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import LinearGradient from 'react-native-linear-gradient';
@@ -15,6 +17,8 @@ import { globalColors } from '../../Theme/globalColors';
 import { h, w, f } from 'walstar-rn-responsive';
 import LocationFields from './LocationFields';
 import { validateForm } from './validations';
+import { useNavigation } from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const EmployerForm = ({
   formData,
@@ -36,13 +40,39 @@ const EmployerForm = ({
   onMeasureDropdown,
   getSelectedName,
   onImagePicker,
-  onSubmit,
   isLoading,
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateField, setDateField] = useState('');
+  const [apiLoading, setApiLoading] = useState(false);
+  const [showSectorDropdown, setShowSectorDropdown] = useState(false);
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const navigation = useNavigation();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSubmit = () => {
+  const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
+  const AUTH_TOKEN = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5ZmQ3OTVjYS0xNjdjLTQ5YzEtOWQ5MS04NmIyZjlmODNjYzMiLCJqdGkiOiIyNTJmNmZjZDE1OTVkNzBjZjE1MDUzYjVlNGMxNTgzNTJlMGE2NDkzYTdkYzI2ZTdjN2MzNjFmMWI2MDE1MDQzNTM0MzZmYjY1OThlNzlkNiIsImlhdCI6MTc2Mjg0MTU3MC4xMzM3NiwibmJmIjoxNzYyODQxNTcwLjEzMzc2MSwiZXhwIjoxNzk0Mzc3NTcwLjEzMjYxMiwic3ViIjoiMSIsInNjb3BlcyI6W119.mnWy3RX7GIVL13pNo9DEwK4MdWqkUvQWzXfiW2HWE8sA-08TkblaSWTJU8DfBBeIhO_s0bFKtjrxmi33ZLfUmZYJbtoNFxLdB4jJwbvY7U0s0V-dDJX1MzXl3Gvb965YMYyIPbM9vip9p7iwdi0W3feGj3rArj_eSpyTGaju8s-haKJeW2JWM6uV91eCf81IDxGSgQrOAXQC8ZNi4vDZquCXw0qv2JrDs-iNLd8-gfl3rPNrci5ZkTpiSc7aSOnPJbohvzHKXAhGgEojzojUEbZV3WXLdSeNRbCdB60KTml7YDz-ctNHJHcB8NNnHkHgjGOeLpe8QvyKIueJVWVbeBNGMGkIMh7DinA9cOvczPwV6GogwqvNpSXASDLsamrHzywNYGmz7kciEdfRpVBpFp8cTEXALD8qdzAs-KJQoNrhxnwUIA52ugiKhNdJikzAyf7T6m4kX7LFVhztXUiXz4vOlBYbCm4NFkI3MkQzG9Nf79AWhQraokfADZw5AIGQAol9771JamMOUIhN5wOhKZuAZAUPhAUbpl65XW2PjoTOPXxmbaHgUvesDWANAvKcapJ89UBRFiL4aakGtxXeZ_rmzZ3__olHln4bPoo3NCzl9zURuKccVKmp09Ks8pYdUqsWPo6ihjNea_7l7aXwn1jSqFTzNVh1-h3pLRnwUjw';
+
+  const companySectors = [
+    { id: 1, name: 'IT & Software' },
+    { id: 2, name: 'Manufacturing' },
+    { id: 3, name: 'Healthcare' },
+    { id: 4, name: 'Education' },
+    { id: 5, name: 'Finance' },
+    { id: 6, name: 'Retail' },
+    { id: 7, name: 'Construction' },
+  ];
+
+  const companyTypes = [
+    { id: 1, name: 'Private Limited' },
+    { id: 2, name: 'Public Limited' },
+    { id: 3, name: 'Partnership' },
+    { id: 4, name: 'Proprietorship' },
+    { id: 5, name: 'LLP' },
+  ];
+
+  const handleSubmit = async () => {
     const errors = validateForm(formData, 'employer');
     
     if (Object.keys(errors).length > 0) {
@@ -50,7 +80,77 @@ const EmployerForm = ({
       return;
     }
 
-    onSubmit(formData);
+    await registerEmployer();
+  };
+
+  const togglePasswordVisibility = () => {
+  setShowPassword(!showPassword);
+};
+
+const toggleConfirmPasswordVisibility = () => {
+  setShowConfirmPassword(!showConfirmPassword);
+};
+
+  const registerEmployer = async () => {
+    try {
+      setApiLoading(true);
+
+      // Prepare API payload according to the curl example
+      const apiPayload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        description: formData.description || '',
+        state_id: parseInt(formData.state_id) || 0,
+        district_id: parseInt(formData.district_id) || 0,
+        taluka_id: parseInt(formData.taluka_id) || 0,
+        village_id: parseInt(formData.village_id) || 0,
+        contact_number_2: formData.contact_number_2 || '',
+        address_line_1: formData.address_line_1 || '',
+        address_line_2: formData.address_line_2 || '',
+        latitude: formData.latitude || '',
+        longitude: formData.longitude || '',
+        zipcode: formData.zipcode || '',
+        website_url: formData.website_url || '',
+        registered_date: formData.established_date || new Date().toISOString().split('T')[0],
+        gst_no: formData.gst_no || '',
+        profile: formData.profile_logo ? formData.profile_logo.data : ''
+      };
+
+      console.log('Sending payload:', apiPayload);
+
+      const response = await fetch(`${API_BASE_URL}/employers`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': AUTH_TOKEN,
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '',
+        },
+        body: JSON.stringify(apiPayload),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      if (responseData.status) {
+        Alert.alert('Success', 'Employer registration successful!');
+        navigation.navigate('Login');
+        console.log('Registration successful:', responseData);
+      } else {
+        throw new Error(responseData.message || 'Registration failed');
+      }
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', error.message || 'Registration failed. Please try again.');
+    } finally {
+      setApiLoading(false);
+    }
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -71,26 +171,81 @@ const EmployerForm = ({
     return new Date(dateString).toLocaleDateString('en-IN');
   };
 
-  const companySectors = [
-    { id: 1, name: 'IT & Software' },
-    { id: 2, name: 'Manufacturing' },
-    { id: 3, name: 'Healthcare' },
-    { id: 4, name: 'Education' },
-    { id: 5, name: 'Finance' },
-    { id: 6, name: 'Retail' },
-    { id: 7, name: 'Construction' },
-  ];
+  const handleSectorSelect = (sector) => {
+    onInputChange('company_sector', sector.name);
+    onInputChange('company_sector_id', sector.id.toString());
+    setShowSectorDropdown(false);
+  };
 
-  const companyTypes = [
-    { id: 1, name: 'Private Limited' },
-    { id: 2, name: 'Public Limited' },
-    { id: 3, name: 'Partnership' },
-    { id: 4, name: 'Proprietorship' },
-    { id: 5, name: 'LLP' },
-  ];
+  const handleTypeSelect = (type) => {
+    onInputChange('company_type', type.name);
+    onInputChange('company_type_id', type.id.toString());
+    setShowTypeDropdown(false);
+  };
+
+  const renderDropdownModal = (visible, data, onSelect, selectedValue, type) => {
+    return (
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          if (type === 'sector') setShowSectorDropdown(false);
+          if (type === 'type') setShowTypeDropdown(false);
+        }}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => {
+            if (type === 'sector') setShowSectorDropdown(false);
+            if (type === 'type') setShowTypeDropdown(false);
+          }}
+        >
+          <View style={styles.centeredModalContainer}>
+            <View style={styles.centeredModalContent}>
+              <ScrollView
+                style={styles.modalScrollView}
+                nestedScrollEnabled={true}
+                showsVerticalScrollIndicator={true}
+              >
+                {data.map(item => {
+                  const isSelected = selectedValue === item.name;
+
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[
+                        styles.modalDropdownItem,
+                        isSelected && styles.selectedDropdownItem,
+                      ]}
+                      onPress={() => {
+                        onSelect(item);
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.modalDropdownItemText,
+                          isSelected && styles.selectedDropdownItemText,
+                        ]}
+                      >
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
+
+  const isSubmitLoading = isLoading || apiLoading;
 
   return (
-    <View>
+    <ScrollView showsVerticalScrollIndicator={false}>
       <Text style={styles.formTitle}>Employer Registration</Text>
       
       <View style={styles.inputContainer}>
@@ -117,24 +272,48 @@ const EmployerForm = ({
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showPassword}
           value={formData.password}
           onChangeText={(text) => onInputChange('password', text)}
         />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={togglePasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
       </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Confirm Password *</Text>
+      <View style={styles.passwordInputContainer}>
         <TextInput
           style={styles.input}
           placeholder="••••••"
-          secureTextEntry
+          secureTextEntry={!showConfirmPassword}
           value={formData.confirm_password}
           onChangeText={(text) => onInputChange('confirm_password', text)}
         />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={toggleConfirmPasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showConfirmPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
         <Text style={styles.hintText}>(Minimum 6 characters)</Text>
       </View>
 
@@ -154,26 +333,52 @@ const EmployerForm = ({
         <Text style={styles.label}>Company Sector</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
-          onPress={() => {/* Implement sector dropdown */}}
+          onPress={() => {
+            setShowSectorDropdown(!showSectorDropdown);
+            setShowTypeDropdown(false);
+          }}
         >
           <Text style={formData.company_sector ? styles.selectedText : styles.placeholderText}>
             {formData.company_sector || 'Select Sector'}
           </Text>
-          <Text style={styles.dropdownArrow}>▼</Text>
+          <Text style={styles.dropdownArrow}>
+            {showSectorDropdown ? '▲' : '▼'}
+          </Text>
         </TouchableOpacity>
+
+        {renderDropdownModal(
+          showSectorDropdown,
+          companySectors,
+          handleSectorSelect,
+          formData.company_sector,
+          'sector'
+        )}
       </View>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Company Type</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
-          onPress={() => {/* Implement type dropdown */}}
+          onPress={() => {
+            setShowTypeDropdown(!showTypeDropdown);
+            setShowSectorDropdown(false);
+          }}
         >
           <Text style={formData.company_type ? styles.selectedText : styles.placeholderText}>
             {formData.company_type || 'Select Type'}
           </Text>
-          <Text style={styles.dropdownArrow}>▼</Text>
+          <Text style={styles.dropdownArrow}>
+            {showTypeDropdown ? '▲' : '▼'}
+          </Text>
         </TouchableOpacity>
+
+        {renderDropdownModal(
+          showTypeDropdown,
+          companyTypes,
+          handleTypeSelect,
+          formData.company_type,
+          'type'
+        )}
       </View>
 
       <View style={styles.inputContainer}>
@@ -219,6 +424,16 @@ const EmployerForm = ({
           placeholder="Enter address line 1"
           value={formData.address_line_1}
           onChangeText={(text) => onInputChange('address_line_1', text)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Address Line 2</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter address line 2"
+          value={formData.address_line_2}
+          onChangeText={(text) => onInputChange('address_line_2', text)}
         />
       </View>
 
@@ -307,7 +522,7 @@ const EmployerForm = ({
       <TouchableOpacity 
         style={styles.submitButton}
         onPress={handleSubmit}
-        disabled={isLoading}
+        disabled={isSubmitLoading}
       >
         <LinearGradient
           colors={[globalColors.purplegradient1, globalColors.purplegradient2]}
@@ -315,7 +530,7 @@ const EmployerForm = ({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
-          {isLoading ? (
+          {isSubmitLoading ? (
             <ActivityIndicator color={globalColors.white} />
           ) : (
             <Text style={styles.submitButtonText}>Register as Employer</Text>
@@ -332,7 +547,7 @@ const EmployerForm = ({
           maximumDate={new Date()}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -371,6 +586,18 @@ const styles = StyleSheet.create({
     fontFamily: 'BaiJamjuree-SemiBold',
     fontSize: f(1.9),
     color: globalColors.black,
+  },
+  passwordInputContainer: {
+    position: 'relative',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: w(4),
+    top: h(1.5),
+    zIndex: 1,
+  },
+  eyeText: {
+    fontSize: 18,
   },
   textArea: {
     minHeight: h(10),
@@ -487,6 +714,46 @@ const styles = StyleSheet.create({
     color: globalColors.white,
     fontSize: f(2),
     fontFamily: 'BaiJamjuree-SemiBold',
+  },
+  // Dropdown Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centeredModalContainer: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  centeredModalContent: {
+    maxHeight: 300,
+  },
+  modalScrollView: {
+    paddingVertical: 10,
+  },
+  modalDropdownItem: {
+    padding: h(1.5),
+    borderBottomWidth: 1,
+    borderBottomColor: globalColors.lightpink,
+  },
+  selectedDropdownItem: {
+    backgroundColor: globalColors.purplegradient1,
+  },
+  modalDropdownItemText: {
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.8),
+    color: globalColors.black,
+  },
+  selectedDropdownItemText: {
+    color: globalColors.white,
   },
 });
 
