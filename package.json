@@ -16,6 +16,7 @@
     "@react-native-community/datetimepicker": "^8.4.4",
     "@react-native-community/hooks": "^100.1.0",
     "@react-native-documents/picker": "^11.0.0",
+    "@react-native-picker/picker": "^2.11.4",
     "@react-native-voice/voice": "github:react-native-voice/voice",
     "@react-native/new-app-screen": "0.80.1",
     "@react-navigation/bottom-tabs": "^7.4.7",

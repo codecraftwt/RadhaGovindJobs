@@ -236,6 +236,24 @@ export default function Login() {
             <Text style={styles.ForgotText}>{t('forgot_password')}</Text>
           </TouchableOpacity> */}
         </View>
+        <View style={styles.btnmaincontainer}>
+          <TouchableOpacity
+            style={styles.loginbtncontainer}
+            onPress={() => navigation.navigate('SignUp')}>
+            <LinearGradient
+              colors={[
+                globalColors.purplegradient1,
+                globalColors.purplegradient2,
+                globalColors.purplegradient3,
+                globalColors.purplegradient4,
+              ]}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={styles.gradient}>
+              <Text style={styles.loginText}>Sign Up</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
