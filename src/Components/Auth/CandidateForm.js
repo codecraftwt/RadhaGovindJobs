@@ -69,9 +69,18 @@ const CandidateForm = ({
     jobCategory: { x: 0, y: 0, width: 0, height: 0 },
     skills: { x: 0, y: 0, width: 0, height: 0 },
   });
+useEffect(() => {
+  console.log('=== Document Upload Debug ===');
+  console.log('formData.resume:', formData.resume);
+  console.log('Type of resume:', typeof formData.resume);
+  if (formData.resume && typeof formData.resume === 'string') {
+    console.log('Resume string length:', formData.resume.length);
+    console.log('First 100 chars:', formData.resume.substring(0, 100));
+  }
+  console.log('=== End Debug ===');
+}, [formData.resume]);
 
   const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
-  const AUTH_TOKEN = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5ZmQ3OTVjYS0xNjdjLTQ5YzEtOWQ5MS04NmIyZjlmODNjYzMiLCJqdGkiOiIyNTJmNmZjZDE1OTVkNzBjZjE1MDUzYjVlNGMxNTgzNTJlMGE2NDkzYTdkYzI2ZTdjN2MzNjFmMWI2MDE1MDQzNTM0MzZmYjY1OThlNzlkNiIsImlhdCI6MTc2Mjg0MTU3MC4xMzM3NiwibmJmIjoxNzYyODQxNTcwLjEzMzc2MSwiZXhwIjoxNzk0Mzc3NTcwLjEzMjYxMiwic3ViIjoiMSIsInNjb3BlcyI6W119.mnWy3RX7GIVL13pNo9DEwK4MdWqkUvQWzXfiW2HWE8sA-08TkblaSWTJU8DfBBeIhO_s0bFKtjrxmi33ZLfUmZYJbtoNFxLdB4jJwbvY7U0s0V-dDJX1MzXl3Gvb965YMYyIPbM9vip9p7iwdi0W3feGj3rArj_eSpyTGaju8s-haKJeW2JWM6uV91eCf81IDxGSgQrOAXQC8ZNi4vDZquCXw0qv2JrDs-iNLd8-gfl3rPNrci5ZkTpiSc7aSOnPJbohvzHKXAhGgEojzojUEbZV3WXLdSeNRbCdB60KTml7YDz-ctNHJHcB8NNnHkHgjGOeLpe8QvyKIueJVWVbeBNGMGkIMh7DinA9cOvczPwV6GogwqvNpSXASDLsamrHzywNYGmz7kciEdfRpVBpFp8cTEXALD8qdzAs-KJQoNrhxnwUIA52ugiKhNdJikzAyf7T6m4kX7LFVhztXUiXz4vOlBYbCm4NFkI3MkQzG9Nf79AWhQraokfADZw5AIGQAol9771JamMOUIhN5wOhKZuAZAUPhAUbpl65XW2PjoTOPXxmbaHgUvesDWANAvKcapJ89UBRFiL4aakGtxXeZ_rmzZ3__olHln4bPoo3NCzl9zURuKccVKmp09Ks8pYdUqsWPo6ihjNea_7l7aXwn1jSqFTzNVh1-h3pLRnwUjw';
 
   const genders = [
     { label: 'Male', value: 'M' },
@@ -128,7 +137,6 @@ const CandidateForm = ({
         method: 'GET',
         headers: {
           'accept': 'application/json',
-          'Authorization': AUTH_TOKEN
         }
       });
 
@@ -158,7 +166,6 @@ const CandidateForm = ({
         method: 'GET',
         headers: {
           'accept': 'application/json',
-          'Authorization': AUTH_TOKEN
         }
       });
 
@@ -194,48 +201,32 @@ const CandidateForm = ({
 
     // Add all fields according to the curl example
     formDataToSend.append('role_id', '2'); // Candidate role
-    formDataToSend.append('fname', formData.fname);
+    formDataToSend.append('fname', formData.fname || '');
     formDataToSend.append('middle_name', formData.middle_name || '');
-    formDataToSend.append('lname', formData.lname);
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('password', formData.password);
-    formDataToSend.append('contact_number_1', formData.phone);
+    formDataToSend.append('lname', formData.lname || '');
+    formDataToSend.append('email', formData.email || '');
+    formDataToSend.append('password', formData.password || '');
+    formDataToSend.append('contact_number_1', formData.phone || '');
     formDataToSend.append('dob', formData.dob || '');
     
     // Address fields
-    formDataToSend.append('address_line_1', formData.address_line_1 || '');
-    formDataToSend.append('address_line_2', formData.address_line_2 || '');
     formDataToSend.append('state_id', formData.state_id?.toString() || '');
     formDataToSend.append('district_id', formData.district_id?.toString() || '');
     formDataToSend.append('taluka_id', formData.taluka_id?.toString() || '');
     formDataToSend.append('village_id', formData.village_id?.toString() || '');
     formDataToSend.append('zipcode', formData.zipcode || '');
+    formDataToSend.append('address_line_1', formData.address_line_1 || 'Pune City');
 
-    // Additional fields from your existing form
-    formDataToSend.append('contact_number_2', formData.contact_number_2 || '');
-    formDataToSend.append('gender', formData.gender || '');
-    formDataToSend.append('blood_group', formData.blood_group || '');
-    formDataToSend.append('aadhar_no', formData.aadhar_no || '');
-    formDataToSend.append('pancard_no', formData.pancard_no || '');
-    formDataToSend.append('profession', formData.profession || '');
-    formDataToSend.append('description', formData.description || '');
-    formDataToSend.append('college_name', formData.college_name || '');
-    formDataToSend.append('passout_year', formData.passout_year || '');
-    formDataToSend.append('qualification', formData.qualification || '');
-    formDataToSend.append('job_category_id', formData.job_category || '');
-    formDataToSend.append('min_experience', formData.min_experience || '0');
-    formDataToSend.append('max_experience', formData.max_experience || '0');
-    formDataToSend.append('job_location', formData.job_location || '');
-    
-    // Skills - convert array to string if needed
-    if (formData.skills) {
-      const skillsArray = Array.isArray(formData.skills) 
-        ? formData.skills 
-        : formData.skills.split(',');
-      skillsArray.forEach(skill => {
-        formDataToSend.append('skill[]', skill);
-      });
+    // Additional optional fields
+    if (formData.contact_number_2) {
+      formDataToSend.append('contact_number_2', formData.contact_number_2);
     }
+    if (formData.gender) {
+      formDataToSend.append('gender', formData.gender);
+    }
+
+    // DEBUG: Check what's in formData.resume
+    console.log('formData.resume before processing:', formData.resume);
 
     // File uploads
     if (formData.profile && formData.profile.path) {
@@ -246,32 +237,89 @@ const CandidateForm = ({
       });
     }
 
-    if (formData.resume && formData.resume.path) {
-      formDataToSend.append('resume', {
-        uri: formData.resume.path,
-        type: formData.resume.type || 'application/pdf',
-        name: formData.resume.filename || 'resume.pdf'
-      });
+    // FIX: Handle resume upload - check for base64 data or file path
+    if (formData.resume) {
+      console.log('Resume data found:', formData.resume);
+      
+      // Check if it's base64 data (from your logs)
+      if (formData.resume.includes('JVBERi0xLjQNJeLjz9MNCjE1')) { // PDF base64 header
+        console.log('Resume is base64 data');
+        // Convert base64 to blob or handle appropriately
+        formDataToSend.append('resume', {
+          uri: `data:application/pdf;base64,${formData.resume}`,
+          type: 'application/pdf',
+          name: 'resume.pdf'
+        });
+      } 
+      // Check if it has file path structure
+      else if (formData.resume.path || formData.resume.uri) {
+        const uri = formData.resume.path || formData.resume.uri;
+        const type = formData.resume.type || 'application/pdf';
+        const name = formData.resume.filename || formData.resume.name || 'resume.pdf';
+        
+        console.log('Adding resume file from path:', { uri, type, name });
+        
+        formDataToSend.append('resume', {
+          uri: uri,
+          type: type,
+          name: name
+        });
+      }
+      // If it's just base64 string without the object wrapper
+      else if (typeof formData.resume === 'string' && formData.resume.length > 100) {
+        console.log('Resume is base64 string');
+        formDataToSend.append('resume', {
+          uri: `data:application/pdf;base64,${formData.resume}`,
+          type: 'application/pdf',
+          name: 'resume.pdf'
+        });
+      }
+      else {
+        console.log('Unknown resume format:', formData.resume);
+      }
+    } else {
+      console.log('No resume data found in formData');
     }
 
     try {
-      console.log("url",`${API_BASE_URL}/registration`)
+      console.log("Sending registration request...");
+      
+      // Log form data for debugging
+      console.log("FormData contents:");
+      for (let [key, value] of formDataToSend._parts) {
+        console.log(key, typeof value === 'object' ? '[FILE OBJECT]' : value);
+      }
+
       const response = await fetch(`${API_BASE_URL}/registration`, {
         method: 'POST',
+        headers: {
+          'Accept': '*/*',
+        },
         body: formDataToSend,
       });
 
-      const result = await response.json();
-
-      console.log("result",result)
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Registration failed');
+      console.log("Response status:", response.status);
+      
+      // Get raw response text first
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
+      
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.log("Response is not JSON:", responseText);
+        throw new Error('Server returned non-JSON response: ' + responseText);
       }
 
-      Alert.alert('Success', 'Candidate registration successful!');
-      navigation.navigate('Login');
-      console.log('Registration successful:', result);
+      console.log("Parsed response:", result);
+
+      if (response.ok) {
+        Alert.alert('Success', 'Candidate registration successful!');
+        navigation.navigate('Login');
+      } else {
+        throw new Error(result.message || `Registration failed with status: ${response.status}`);
+      }
       
     } catch (error) {
       console.error('Registration error:', error);
@@ -949,13 +997,26 @@ const CandidateForm = ({
         <DocumentUpload 
           type="Upload Resume" 
           onUploadComplete={(fileInfo) => {
-            console.log('Resume uploaded:', fileInfo);
+            console.log('Resume uploaded callback - raw fileInfo:', fileInfo);
+            if (fileInfo.uri) {
+              // If it has a file URI
             onInputChange('resume', {
               path: fileInfo.uri,
-              filename: fileInfo.name,
+              filename: fileInfo.name || 'resume.pdf',
               size: fileInfo.size,
-              type: fileInfo.type
-            });
+                type: fileInfo.type || 'application/pdf'
+              });
+            } else if (fileInfo.base64) {
+              // If it's base64 data
+              console.log('Setting resume as base64 data');
+              onInputChange('resume', fileInfo.base64);
+            } else if (typeof fileInfo === 'string') {
+              console.log('Setting resume as base64 string');
+              onInputChange('resume', fileInfo);
+            } else {
+              console.log('Unknown fileInfo structure, setting raw:', fileInfo);
+              onInputChange('resume', fileInfo);
+            }
           }}
           onRemove={() => {
             console.log('Resume removed');
