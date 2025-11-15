@@ -80,6 +80,8 @@ const ConsultantForm = ({
       // Add all fields according to the curl example structure
       formDataToSend.append('role_id', '3'); // Consultant role (assuming 3 is for consultants)
       formDataToSend.append('fname', formData.name); // Using name as fname
+      formDataToSend.append('lname', " lname"); 
+      formDataToSend.append('middle_name', " middle_name"); 
       formDataToSend.append('email', formData.email);
       formDataToSend.append('password', formData.password);
       formDataToSend.append('contact_number_1', formData.phone);

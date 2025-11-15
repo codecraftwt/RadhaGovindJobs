@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import LinearGradient from 'react-native-linear-gradient';
@@ -15,6 +16,7 @@ import { globalColors } from '../../Theme/globalColors';
 import { h, w, f } from 'walstar-rn-responsive';
 import LocationFields from './LocationFields';
 import { validateForm } from './validations';
+import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const GramPanchayatForm = ({
@@ -37,15 +39,17 @@ const GramPanchayatForm = ({
   onMeasureDropdown,
   getSelectedName,
   onImagePicker,
-  onSubmit,
   isLoading,
 }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateField, setDateField] = useState('');
+  const [apiLoading, setApiLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+  const navigation = useNavigation();
 
-  
+  const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -54,7 +58,7 @@ const GramPanchayatForm = ({
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errors = validateForm(formData, 'gram_panchayat');
     
     if (Object.keys(errors).length > 0) {
@@ -62,7 +66,83 @@ const GramPanchayatForm = ({
       return;
     }
 
-    onSubmit(formData);
+    await registerGramPanchayat();
+  };
+
+  const registerGramPanchayat = async () => {
+    try {
+      setApiLoading(true);
+
+      // Prepare form data according to the API requirements
+      const formDataToSend = new FormData();
+
+      // Add all fields according to the API structure
+      formDataToSend.append('role_id', '6'); // Gram Panchayat role ID
+      formDataToSend.append('fname', formData.name); // Using gram panchayat name as fname
+      formDataToSend.append('lname', " lname"); // Default lname
+      formDataToSend.append('middle_name', " middle_name"); // Empty middle name
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('contact_number_1', formData.phone);
+      
+      // Gram Panchayat specific fields
+      formDataToSend.append('established_date', formData.established_date || '');
+      
+      // Address fields
+      formDataToSend.append('address_line_1', formData.address_line_1 || '');
+      formDataToSend.append('address_line_2', formData.address_line_2 || '');
+      formDataToSend.append('state_id', formData.state_id?.toString() || '');
+      formDataToSend.append('district_id', formData.district_id?.toString() || '');
+      formDataToSend.append('taluka_id', formData.taluka_id?.toString() || '');
+      formDataToSend.append('village_id', formData.village_id?.toString() || '');
+      formDataToSend.append('zipcode', formData.zipcode || '');
+
+      // Additional fields
+      formDataToSend.append('contact_number_2', formData.contact_number_2 || '');
+      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('website_url', formData.website_url || '');
+      formDataToSend.append('gst_no', formData.gst_no || '');
+
+      // File uploads
+      if (formData.profile_logo && formData.profile_logo.path) {
+        formDataToSend.append('profile', {
+          uri: formData.profile_logo.path,
+          type: formData.profile_logo.type || 'image/jpeg',
+          name: formData.profile_logo.filename || 'profile_logo.jpg'
+        });
+      }
+
+      console.log('Sending gram panchayat registration data...');
+
+      const response = await fetch(`${API_BASE_URL}/registration`, {
+        method: 'POST',
+        body: formDataToSend,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const responseData = await response.json();
+      console.log("Registration response:", responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      if (responseData.status) {
+        Alert.alert('Success', 'Gram Panchayat registration successful!');
+        navigation.navigate('Login');
+        console.log('Registration successful:', responseData);
+      } else {
+        throw new Error(responseData.message || 'Registration failed');
+      }
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', error.message || 'Registration failed. Please try again.');
+    } finally {
+      setApiLoading(false);
+    }
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -83,8 +163,10 @@ const GramPanchayatForm = ({
     return new Date(dateString).toLocaleDateString('en-IN');
   };
 
+  const isSubmitLoading = isLoading || apiLoading;
+
   return (
-    <View>
+    <ScrollView showsVerticalScrollIndicator={false}>
       <Text style={styles.formTitle}>Gram Panchayat Registration</Text>
       
       <View style={styles.inputContainer}>
@@ -301,7 +383,7 @@ const GramPanchayatForm = ({
       <TouchableOpacity 
         style={styles.submitButton}
         onPress={handleSubmit}
-        disabled={isLoading}
+        disabled={isSubmitLoading}
       >
         <LinearGradient
           colors={[globalColors.purplegradient1, globalColors.purplegradient2]}
@@ -309,7 +391,7 @@ const GramPanchayatForm = ({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
-          {isLoading ? (
+          {isSubmitLoading ? (
             <ActivityIndicator color={globalColors.white} />
           ) : (
             <Text style={styles.submitButtonText}>Register as Gram Panchayat</Text>
@@ -326,7 +408,7 @@ const GramPanchayatForm = ({
           maximumDate={new Date()}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 

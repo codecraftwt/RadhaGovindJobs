@@ -52,7 +52,6 @@ const EmployerForm = ({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
-  const AUTH_TOKEN = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI5ZmQ3OTVjYS0xNjdjLTQ5YzEtOWQ5MS04NmIyZjlmODNjYzMiLCJqdGkiOiIyNTJmNmZjZDE1OTVkNzBjZjE1MDUzYjVlNGMxNTgzNTJlMGE2NDkzYTdkYzI2ZTdjN2MzNjFmMWI2MDE1MDQzNTM0MzZmYjY1OThlNzlkNiIsImlhdCI6MTc2Mjg0MTU3MC4xMzM3NiwibmJmIjoxNzYyODQxNTcwLjEzMzc2MSwiZXhwIjoxNzk0Mzc3NTcwLjEzMjYxMiwic3ViIjoiMSIsInNjb3BlcyI6W119.mnWy3RX7GIVL13pNo9DEwK4MdWqkUvQWzXfiW2HWE8sA-08TkblaSWTJU8DfBBeIhO_s0bFKtjrxmi33ZLfUmZYJbtoNFxLdB4jJwbvY7U0s0V-dDJX1MzXl3Gvb965YMYyIPbM9vip9p7iwdi0W3feGj3rArj_eSpyTGaju8s-haKJeW2JWM6uV91eCf81IDxGSgQrOAXQC8ZNi4vDZquCXw0qv2JrDs-iNLd8-gfl3rPNrci5ZkTpiSc7aSOnPJbohvzHKXAhGgEojzojUEbZV3WXLdSeNRbCdB60KTml7YDz-ctNHJHcB8NNnHkHgjGOeLpe8QvyKIueJVWVbeBNGMGkIMh7DinA9cOvczPwV6GogwqvNpSXASDLsamrHzywNYGmz7kciEdfRpVBpFp8cTEXALD8qdzAs-KJQoNrhxnwUIA52ugiKhNdJikzAyf7T6m4kX7LFVhztXUiXz4vOlBYbCm4NFkI3MkQzG9Nf79AWhQraokfADZw5AIGQAol9771JamMOUIhN5wOhKZuAZAUPhAUbpl65XW2PjoTOPXxmbaHgUvesDWANAvKcapJ89UBRFiL4aakGtxXeZ_rmzZ3__olHln4bPoo3NCzl9zURuKccVKmp09Ks8pYdUqsWPo6ihjNea_7l7aXwn1jSqFTzNVh1-h3pLRnwUjw';
 
   const companySectors = [
     { id: 1, name: 'IT & Software' },
@@ -72,6 +71,14 @@ const EmployerForm = ({
     { id: 5, name: 'LLP' },
   ];
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   const handleSubmit = async () => {
     const errors = validateForm(formData, 'employer');
     
@@ -83,55 +90,65 @@ const EmployerForm = ({
     await registerEmployer();
   };
 
-  const togglePasswordVisibility = () => {
-  setShowPassword(!showPassword);
-};
-
-const toggleConfirmPasswordVisibility = () => {
-  setShowConfirmPassword(!showConfirmPassword);
-};
-
   const registerEmployer = async () => {
     try {
       setApiLoading(true);
 
-      // Prepare API payload according to the curl example
-      const apiPayload = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-        description: formData.description || '',
-        state_id: parseInt(formData.state_id) || 0,
-        district_id: parseInt(formData.district_id) || 0,
-        taluka_id: parseInt(formData.taluka_id) || 0,
-        village_id: parseInt(formData.village_id) || 0,
-        contact_number_2: formData.contact_number_2 || '',
-        address_line_1: formData.address_line_1 || '',
-        address_line_2: formData.address_line_2 || '',
-        latitude: formData.latitude || '',
-        longitude: formData.longitude || '',
-        zipcode: formData.zipcode || '',
-        website_url: formData.website_url || '',
-        registered_date: formData.established_date || new Date().toISOString().split('T')[0],
-        gst_no: formData.gst_no || '',
-        profile: formData.profile_logo ? formData.profile_logo.data : ''
-      };
+      // Prepare form data according to the API requirements
+      const formDataToSend = new FormData();
 
-      console.log('Sending payload:', apiPayload);
+      // Add all fields according to the API structure
+      formDataToSend.append('role_id', '3'); // Employer role ID
+      formDataToSend.append('fname', formData.name); // Using employer name as fname
+      formDataToSend.append('lname', "Employer"); // Default lname
+      formDataToSend.append('middle_name', " middle_name"); // Empty middle name
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('contact_number_1', formData.phone);
+      
+      // Employer specific fields
+      formDataToSend.append('established_date', formData.established_date || '');
+      formDataToSend.append('company_sector', formData.company_sector || '');
+      formDataToSend.append('company_sector_id', formData.company_sector_id || '');
+      formDataToSend.append('company_type', formData.company_type || '');
+      formDataToSend.append('company_type_id', formData.company_type_id || '');
+      
+      // Address fields
+      formDataToSend.append('address_line_1', formData.address_line_1 || '');
+      formDataToSend.append('address_line_2', formData.address_line_2 || '');
+      formDataToSend.append('state_id', formData.state_id?.toString() || '');
+      formDataToSend.append('district_id', formData.district_id?.toString() || '');
+      formDataToSend.append('taluka_id', formData.taluka_id?.toString() || '');
+      formDataToSend.append('village_id', formData.village_id?.toString() || '');
+      formDataToSend.append('zipcode', formData.zipcode || '');
 
-      const response = await fetch(`${API_BASE_URL}/employers`, {
+      // Additional fields
+      formDataToSend.append('contact_number_2', formData.contact_number_2 || '');
+      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('website_url', formData.website_url || '');
+      formDataToSend.append('gst_no', formData.gst_no || '');
+
+      // File uploads
+      if (formData.profile_logo && formData.profile_logo.path) {
+        formDataToSend.append('profile', {
+          uri: formData.profile_logo.path,
+          type: formData.profile_logo.type || 'image/jpeg',
+          name: formData.profile_logo.filename || 'profile_logo.jpg'
+        });
+      }
+
+      console.log('Sending employer registration data...');
+
+      const response = await fetch(`${API_BASE_URL}/registration`, {
         method: 'POST',
+        body: formDataToSend,
         headers: {
-          'accept': 'application/json',
-          'Authorization': AUTH_TOKEN,
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': '',
+          'Content-Type': 'multipart/form-data',
         },
-        body: JSON.stringify(apiPayload),
       });
 
       const responseData = await response.json();
+      console.log("Registration response:", responseData);
 
       if (!response.ok) {
         throw new Error(responseData.message || `HTTP error! status: ${response.status}`);

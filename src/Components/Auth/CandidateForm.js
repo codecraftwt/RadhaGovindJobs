@@ -69,16 +69,16 @@ const CandidateForm = ({
     jobCategory: { x: 0, y: 0, width: 0, height: 0 },
     skills: { x: 0, y: 0, width: 0, height: 0 },
   });
-useEffect(() => {
-  console.log('=== Document Upload Debug ===');
-  console.log('formData.resume:', formData.resume);
-  console.log('Type of resume:', typeof formData.resume);
-  if (formData.resume && typeof formData.resume === 'string') {
-    console.log('Resume string length:', formData.resume.length);
-    console.log('First 100 chars:', formData.resume.substring(0, 100));
-  }
-  console.log('=== End Debug ===');
-}, [formData.resume]);
+  useEffect(() => {
+    console.log('=== Document Upload Debug ===');
+    console.log('formData.resume:', formData.resume);
+    console.log('Type of resume:', typeof formData.resume);
+    if (formData.resume && typeof formData.resume === 'string') {
+      console.log('Resume string length:', formData.resume.length);
+      console.log('First 100 chars:', formData.resume.substring(0, 100));
+    }
+    console.log('=== End Debug ===');
+  }, [formData.resume]);
 
   const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
 
@@ -207,7 +207,12 @@ useEffect(() => {
     formDataToSend.append('email', formData.email || '');
     formDataToSend.append('password', formData.password || '');
     formDataToSend.append('contact_number_1', formData.phone || '');
+    formDataToSend.append('contact_number_2', formData.contact_number_2 || '');
     formDataToSend.append('dob', formData.dob || '');
+    formDataToSend.append('gender', formData.gender || '');
+    formDataToSend.append('blood_group', formData.blood_group || '');
+    formDataToSend.append('aadhar_no', formData.aadhar_no || '');
+    formDataToSend.append('pancard_no', formData.pancard_no || '');
     
     // Address fields
     formDataToSend.append('state_id', formData.state_id?.toString() || '');
@@ -215,18 +220,30 @@ useEffect(() => {
     formDataToSend.append('taluka_id', formData.taluka_id?.toString() || '');
     formDataToSend.append('village_id', formData.village_id?.toString() || '');
     formDataToSend.append('zipcode', formData.zipcode || '');
-    formDataToSend.append('address_line_1', formData.address_line_1 || 'Pune City');
-
-    // Additional optional fields
-    if (formData.contact_number_2) {
-      formDataToSend.append('contact_number_2', formData.contact_number_2);
+    formDataToSend.append('address_line_1', formData.address_line_1 || '');
+    formDataToSend.append('address_line_2', formData.address_line_2 || '');
+    
+    // Education and professional details
+    formDataToSend.append('college_name', formData.college_name || '');
+    formDataToSend.append('passout_year', formData.passout_year || '');
+    formDataToSend.append('qualification', formData.qualification || '');
+    formDataToSend.append('profession', formData.profession || '');
+    formDataToSend.append('description', formData.description || '');
+    formDataToSend.append('min_experience', formData.min_experience || '0');
+    formDataToSend.append('max_experience', formData.max_experience || '0');
+    formDataToSend.append('job_location', formData.job_location || '');
+    
+    // Skills - using skill[] format as per curl
+    if (formData.skills) {
+      const skillsArray = Array.isArray(formData.skills) 
+        ? formData.skills 
+        : formData.skills.split(',');
+      skillsArray.forEach(skill => {
+        if (skill.trim()) { // Only append non-empty skills
+          formDataToSend.append('skill[]', skill.trim());
+        }
+      });
     }
-    if (formData.gender) {
-      formDataToSend.append('gender', formData.gender);
-    }
-
-    // DEBUG: Check what's in formData.resume
-    console.log('formData.resume before processing:', formData.resume);
 
     // File uploads
     if (formData.profile && formData.profile.path) {
@@ -241,18 +258,7 @@ useEffect(() => {
     if (formData.resume) {
       console.log('Resume data found:', formData.resume);
       
-      // Check if it's base64 data (from your logs)
-      if (formData.resume.includes('JVBERi0xLjQNJeLjz9MNCjE1')) { // PDF base64 header
-        console.log('Resume is base64 data');
-        // Convert base64 to blob or handle appropriately
-        formDataToSend.append('resume', {
-          uri: `data:application/pdf;base64,${formData.resume}`,
-          type: 'application/pdf',
-          name: 'resume.pdf'
-        });
-      } 
-      // Check if it has file path structure
-      else if (formData.resume.path || formData.resume.uri) {
+      if (formData.resume.path || formData.resume.uri) {
         const uri = formData.resume.path || formData.resume.uri;
         const type = formData.resume.type || 'application/pdf';
         const name = formData.resume.filename || formData.resume.name || 'resume.pdf';
@@ -264,7 +270,7 @@ useEffect(() => {
           type: type,
           name: name
         });
-      }
+      } 
       // If it's just base64 string without the object wrapper
       else if (typeof formData.resume === 'string' && formData.resume.length > 100) {
         console.log('Resume is base64 string');
@@ -273,7 +279,7 @@ useEffect(() => {
           type: 'application/pdf',
           name: 'resume.pdf'
         });
-      }
+      } 
       else {
         console.log('Unknown resume format:', formData.resume);
       }
@@ -287,13 +293,18 @@ useEffect(() => {
       // Log form data for debugging
       console.log("FormData contents:");
       for (let [key, value] of formDataToSend._parts) {
-        console.log(key, typeof value === 'object' ? '[FILE OBJECT]' : value);
+        if (typeof value === 'object' && value.uri) {
+          console.log(key, '[FILE]', value.name);
+        } else {
+          console.log(key, value);
+        }
       }
 
       const response = await fetch(`${API_BASE_URL}/registration`, {
         method: 'POST',
         headers: {
           'Accept': '*/*',
+          // 'X-CSRF-TOKEN': '<YOUR_CSRF_TOKEN>', // Uncomment and add your token if needed
         },
         body: formDataToSend,
       });
@@ -330,7 +341,11 @@ useEffect(() => {
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      const formattedDate = selectedDate.toISOString().split('T')[0];
+      // Format date as YYYY-MM-DD as per curl example
+      const year = selectedDate.getFullYear();
+      const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+      const day = selectedDate.getDate().toString().padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
       onInputChange(dateField, formattedDate);
     }
   };
@@ -341,8 +356,16 @@ useEffect(() => {
   };
 
   const formatDate = dateString => {
-    if (!dateString) return 'dd-mm-yyyy';
-    return new Date(dateString).toLocaleDateString('en-IN');
+    if (!dateString) return 'yyyy-mm-dd';
+    // Handle both YYYY-MM-DD and other formats
+    if (dateString.includes('-')) {
+      return dateString;
+    }
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const handleGenderSelect = gender => {
@@ -541,49 +564,49 @@ useEffect(() => {
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Password *</Text>
-      <View style={styles.passwordInputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="••••••"
-          secureTextEntry={!showPassword}
-          value={formData.password}
-          onChangeText={text => onInputChange('password', text)}
-        />
-        <TouchableOpacity 
-          style={styles.eyeIcon}
-          onPress={togglePasswordVisibility}
-        >
-          <MaterialCommunityIcons
-            name={showPassword ? 'eye' : 'eye-off'}
-            size={w(5.5)}
-            color={globalColors.mauve}
+        <View style={styles.passwordInputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="••••••"
+            secureTextEntry={!showPassword}
+            value={formData.password}
+            onChangeText={text => onInputChange('password', text)}
           />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity 
+            style={styles.eyeIcon}
+            onPress={togglePasswordVisibility}
+          >
+            <MaterialCommunityIcons
+              name={showPassword ? 'eye' : 'eye-off'}
+              size={w(5.5)}
+              color={globalColors.mauve}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
     {/* Confirm Password Field - Fixed */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Confirm Password *</Text>
-      <View style={styles.passwordInputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="••••••"
-          secureTextEntry={!showConfirmPassword}
-          value={formData.confirm_password}
-          onChangeText={text => onInputChange('confirm_password', text)}
-        />
-        <TouchableOpacity 
-          style={styles.eyeIcon}
-          onPress={toggleConfirmPasswordVisibility}
-        >
-          <MaterialCommunityIcons
-            name={showConfirmPassword ? 'eye' : 'eye-off'}
-            size={w(5.5)}
-            color={globalColors.mauve}
+        <View style={styles.passwordInputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="••••••"
+            secureTextEntry={!showConfirmPassword}
+            value={formData.confirm_password}
+            onChangeText={text => onInputChange('confirm_password', text)}
           />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity 
+            style={styles.eyeIcon}
+            onPress={toggleConfirmPasswordVisibility}
+          >
+            <MaterialCommunityIcons
+              name={showConfirmPassword ? 'eye' : 'eye-off'}
+              size={w(5.5)}
+              color={globalColors.mauve}
+            />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.hintText}>(Minimum 6 characters)</Text>
       </View>
 
@@ -1000,10 +1023,10 @@ useEffect(() => {
             console.log('Resume uploaded callback - raw fileInfo:', fileInfo);
             if (fileInfo.uri) {
               // If it has a file URI
-            onInputChange('resume', {
-              path: fileInfo.uri,
-              filename: fileInfo.name || 'resume.pdf',
-              size: fileInfo.size,
+              onInputChange('resume', {
+                path: fileInfo.uri,
+                filename: fileInfo.name || 'resume.pdf',
+                size: fileInfo.size,
                 type: fileInfo.type || 'application/pdf'
               });
             } else if (fileInfo.base64) {
