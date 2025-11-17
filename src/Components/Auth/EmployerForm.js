@@ -19,6 +19,7 @@ import LocationFields from './LocationFields';
 import { validateForm } from './validations';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
 
 const EmployerForm = ({
   formData,
@@ -50,6 +51,7 @@ const EmployerForm = ({
   const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { t } = useTranslation();
 
   const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
 
@@ -263,21 +265,23 @@ const EmployerForm = ({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <Text style={styles.formTitle}>Employer Registration</Text>
+      <Text style={styles.formTitle}>{t('employee')} {t('Registration')}</Text>
       
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Employer name *</Text>
+        <Text style={styles.label}>{t('employee')} {t('name')} *</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter Your Full Name"
+          placeholder={t('enter_full_name')}
           value={formData.name}
           onChangeText={(text) => onInputChange('name', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email Id *</Text>
+        <Text style={styles.label}>{t('Email')} {t('Id')} *</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="test.employer@gmail.com"
           keyboardType="email-address"
@@ -288,9 +292,10 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Password *</Text>
+        <Text style={styles.label}>{t('Password')} *</Text>
       <View style={styles.passwordInputContainer}>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="••••••"
           secureTextEntry={!showPassword}
@@ -311,9 +316,10 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Confirm Password *</Text>
+        <Text style={styles.label}>{t('confirm_password')} *</Text>
       <View style={styles.passwordInputContainer}>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="••••••"
           secureTextEntry={!showConfirmPassword}
@@ -331,11 +337,11 @@ const EmployerForm = ({
           />
         </TouchableOpacity>
       </View>
-        <Text style={styles.hintText}>(Minimum 6 characters)</Text>
+        <Text style={styles.hintText}>{t('minimum_characters')}</Text>
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Established Date</Text>
+        <Text style={styles.label}>{t('established_date')}</Text>
         <TouchableOpacity
           style={styles.datePickerButton}
           onPress={() => showDatePickerModal('established_date')}
@@ -347,7 +353,7 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Company Sector</Text>
+        <Text style={styles.label}>{t('company_sector')}</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => {
@@ -356,7 +362,7 @@ const EmployerForm = ({
           }}
         >
           <Text style={formData.company_sector ? styles.selectedText : styles.placeholderText}>
-            {formData.company_sector || 'Select Sector'}
+            {formData.company_sector || t("select") + " " + t("company_sector")}
           </Text>
           <Text style={styles.dropdownArrow}>
             {showSectorDropdown ? '▲' : '▼'}
@@ -373,7 +379,7 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Company Type</Text>
+        <Text style={styles.label}>{t('company_type')}</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => {
@@ -382,7 +388,7 @@ const EmployerForm = ({
           }}
         >
           <Text style={formData.company_type ? styles.selectedText : styles.placeholderText}>
-            {formData.company_type || 'Select Type'}
+            {formData.company_type ||  t("select") + " " + t("company_type")}
           </Text>
           <Text style={styles.dropdownArrow}>
             {showTypeDropdown ? '▲' : '▼'}
@@ -399,14 +405,15 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Mobile number *</Text>
+        <Text style={styles.label}>{t('mobile_number')} *</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
+          placeholderTextColor={globalColors.mauve}
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter your mobile number"
+            placeholder={t('enter') + ' ' + t('your') + ' ' + t('mobile_number')}
             keyboardType="phone-pad"
             value={formData.phone}
             onChangeText={(text) => onInputChange('phone', text)}
@@ -416,14 +423,15 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Alternate Contact No</Text>
+        <Text style={styles.label}>{t('alternate_contact_number')}</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
+          placeholderTextColor={globalColors.mauve}
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter alternate contact number"
+            placeholder={t('enter') + ' ' + t('alternate_contact_number')}
             keyboardType="phone-pad"
             value={formData.contact_number_2}
             onChangeText={(text) => onInputChange('contact_number_2', text)}
@@ -432,23 +440,25 @@ const EmployerForm = ({
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Address Details</Text>
+      <Text style={styles.sectionTitle}>{t('address_details')}</Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Address Line 1</Text>
+        <Text style={styles.label}>{t('Address Line 1')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter address line 1"
+          placeholder={t('enter') + ' ' + t('Address Line 1')}
           value={formData.address_line_1}
           onChangeText={(text) => onInputChange('address_line_1', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Address Line 2</Text>
+        <Text style={styles.label}>{t('Address Line 2')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter address line 2"
+          placeholder={t('enter') + ' ' + t('Address Line 2')}
           value={formData.address_line_2}
           onChangeText={(text) => onInputChange('address_line_2', text)}
         />
@@ -477,10 +487,11 @@ const EmployerForm = ({
       />
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Website Url</Text>
+        <Text style={styles.label}>{t('website_url')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter website URL"
+          placeholder={t('enter') + ' ' + t('website_url')}
           keyboardType="url"
           autoCapitalize="none"
           value={formData.website_url}
@@ -489,10 +500,11 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>GST No</Text>
+        <Text style={styles.label}>{t('gst_no')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter GST number"
+          placeholder={t('enter') + ' ' + t('gst_no')}
           value={formData.gst_no}
           onChangeText={(text) => onInputChange('gst_no', text)}
           maxLength={15}
@@ -500,7 +512,7 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Profile logo</Text>
+        <Text style={styles.label}>{t('profile_logo')}</Text>
         <TouchableOpacity 
           style={styles.fileUploadButton}
           onPress={() => onImagePicker('profile_logo')}
@@ -524,10 +536,11 @@ const EmployerForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Description</Text>
+        <Text style={styles.label}>{t('description')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={[styles.input, styles.textArea]}
-          placeholder="Enter company description"
+          placeholder={t('enter') + ' ' + t('company') + ' ' + t('description')}
           value={formData.description}
           onChangeText={(text) => onInputChange('description', text)}
           multiline
@@ -550,7 +563,7 @@ const EmployerForm = ({
           {isSubmitLoading ? (
             <ActivityIndicator color={globalColors.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Register as Employer</Text>
+            <Text style={styles.submitButtonText}>{t('register_as_employer')}</Text>
           )}
         </LinearGradient>
       </TouchableOpacity>

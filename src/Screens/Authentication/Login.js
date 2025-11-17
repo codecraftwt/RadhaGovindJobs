@@ -250,7 +250,7 @@ export default function Login() {
               start={{x: 0, y: 0}}
               end={{x: 1, y: 0}}
               style={styles.gradient}>
-              <Text style={styles.loginText}>Sign Up</Text>
+              <Text style={styles.loginText}>{t('SignUp')}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

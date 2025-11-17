@@ -25,10 +25,12 @@ import ImagePickerModal from '../../Components/ImagePickerModal';
 
 // Services
 import { useLocationService } from '../../Services/LocationService';
+import { useTranslation } from 'react-i18next';
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
   const isLoading = useSelector(state => state.auth.isLoading);
+  const { t } = useTranslation();
 
   const [selectedRole, setSelectedRole] = useState('');
   const [step, setStep] = useState(1);
@@ -445,7 +447,7 @@ const SignUpScreen = () => {
       {step === 2 && (
         <>
           <TouchableOpacity style={styles.backLink} onPress={handleBack}>
-            <Text style={styles.backLinkText}>← Back to Roles</Text>
+            <Text style={styles.backLinkText}>{t('back_to_roles')}</Text>
           </TouchableOpacity>
 
           <ScrollView

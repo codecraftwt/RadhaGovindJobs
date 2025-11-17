@@ -2,21 +2,23 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
 import { h, w, f } from 'walstar-rn-responsive';
+import {useTranslation} from 'react-i18next';
 
 const RoleSelection = ({ onRoleSelect }) => {
+  const {t} = useTranslation();
   const roles = [
-    { label: 'Candidate', value: 'candidate', description: 'Looking for job opportunities' },
-    { label: 'Consultant', value: 'consultant', description: 'Provide consulting services' },
-    { label: 'Employer', value: 'employer', description: 'Hire talented candidates' },
-    { label: 'Institute', value: 'institute', description: 'Educational institution' },
-    { label: 'Gram Panchayat', value: 'gram_panchayat', description: 'Local government body' },
-    { label: 'Already have an account? Login', value: 'Login', description: 'Access your account' },
+    { label: 'candidate', value: 'candidate', description: 'looking_for_job' },
+    { label: 'consultant', value: 'consultant', description: 'provide_consulting' },
+    { label: 'employee', value: 'employer', description: 'hire_talented' },
+    { label: 'Institute', value: 'institute', description: 'educational_institution' },
+    { label: 'GramPanchayat', value: 'gram_panchayat', description: 'local_government' },
+    { label: "HaveAccount", value: 'Login', description: 'access_account' },
   ];
 
   return (
     <View style={styles.roleSelectionContainer}>
-      <Text style={styles.title}>Join Our Platform</Text>
-      <Text style={styles.subtitle}>Select your role to get started</Text>
+      <Text style={styles.title}>{t('join_platform')}</Text>
+      <Text style={styles.subtitle}>{t('select_role')}</Text>
       
       <View style={styles.rolesGrid}>
         {roles.map((role, index) => (
@@ -28,9 +30,9 @@ const RoleSelection = ({ onRoleSelect }) => {
             ]}
             onPress={() => onRoleSelect(role.value)}
           >
-            <Text style={styles.roleLabel}>{role.label}</Text>
+            <Text style={styles.roleLabel}>{t(`${role.label}`)}</Text>
             {role.description && (
-              <Text style={styles.roleDescription}>{role.description}</Text>
+              <Text style={styles.roleDescription}>{t(`${role.description}`)}</Text>
             )}
           </TouchableOpacity>
         ))}

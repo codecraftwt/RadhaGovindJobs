@@ -20,6 +20,7 @@ import { validateForm } from './validations';
 import { useNavigation } from '@react-navigation/native';
 import DocumentUpload from '../DocumentUpload';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
 
 const CandidateForm = ({
   formData,
@@ -52,6 +53,7 @@ const CandidateForm = ({
     useState(false);
   const [showJobCategoryDropdown, setShowJobCategoryDropdown] = useState(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
+  const { t } = useTranslation();
 
   // New states for API data
   const [jobCategories, setJobCategories] = useState([]);
@@ -504,7 +506,7 @@ const CandidateForm = ({
                   style={styles.doneButton}
                   onPress={() => setShowSkillsDropdown(false)}
                 >
-                  <Text style={styles.doneButtonText}>Done</Text>
+                  <Text style={styles.doneButtonText}>{t('Done')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -516,24 +518,26 @@ const CandidateForm = ({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <Text style={styles.formTitle}>Candidate Registration</Text>
+      <Text style={styles.formTitle}>{t('candidate')} {t('Registration')}</Text>
 
       <View style={styles.row}>
         <View style={[styles.inputContainer, styles.halfInput]}>
-          <Text style={styles.label}>Candidate First Name *</Text>
+          <Text style={styles.label}>{t('candidate')} {t('First Name')} *</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter first name"
+            placeholderTextColor={globalColors.mauve}
+            placeholder={t('enter') + ' ' + t('first_name')}
             value={formData.fname}
             onChangeText={text => onInputChange('fname', text)}
           />
         </View>
 
         <View style={[styles.inputContainer, styles.halfInput]}>
-          <Text style={styles.label}>Middle Name</Text>
+          <Text style={styles.label}>{t('Middle Name')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter middle name"
+            placeholderTextColor={globalColors.mauve}
+            placeholder={t('enter') + ' ' + t('Middle Name')}
             value={formData.middle_name}
             onChangeText={text => onInputChange('middle_name', text)}
           />
@@ -541,19 +545,21 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Last Name *</Text>
+        <Text style={styles.label}>{t('Last Name')} *</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter last name"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('last_name')}
           value={formData.lname}
           onChangeText={text => onInputChange('lname', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email Id *</Text>
+        <Text style={styles.label}>{t('Email')} {t('Id')} *</Text>
         <TextInput
           style={styles.input}
+          placeholderTextColor={globalColors.mauve}
           placeholder="test.candidate@gmail.com"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -563,10 +569,11 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Password *</Text>
+        <Text style={styles.label}>{t('Password')} *</Text>
         <View style={styles.passwordInputContainer}>
           <TextInput
             style={styles.input}
+            placeholderTextColor={globalColors.mauve}
             placeholder="••••••"
             secureTextEntry={!showPassword}
             value={formData.password}
@@ -587,10 +594,11 @@ const CandidateForm = ({
 
     {/* Confirm Password Field - Fixed */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Confirm Password *</Text>
+        <Text style={styles.label}>{t('confirm_password')} *</Text>
         <View style={styles.passwordInputContainer}>
           <TextInput
             style={styles.input}
+            placeholderTextColor={globalColors.mauve}
             placeholder="••••••"
             secureTextEntry={!showConfirmPassword}
             value={formData.confirm_password}
@@ -607,11 +615,11 @@ const CandidateForm = ({
             />
           </TouchableOpacity>
         </View>
-        <Text style={styles.hintText}>(Minimum 6 characters)</Text>
+        <Text style={styles.hintText}>{t('minimum_characters')}</Text>
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>DOB</Text>
+        <Text style={styles.label}>{t('DOB')}</Text>
         <TouchableOpacity
           style={styles.datePickerButton}
           onPress={() => showDatePickerModal('dob')}
@@ -626,7 +634,7 @@ const CandidateForm = ({
 
       {/* Gender Dropdown */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Gender</Text>
+        <Text style={styles.label}>{t('Gender')}</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => {
@@ -645,7 +653,7 @@ const CandidateForm = ({
           >
             {formData.gender
               ? genders.find(g => g.value === formData.gender)?.label
-              : 'Select Gender'}
+              : t('select') + ' ' + t('Gender')}
           </Text>
           <Text style={styles.dropdownArrow}>
             {showGenderDropdown ? '▲' : '▼'}
@@ -663,7 +671,7 @@ const CandidateForm = ({
 
       {/* Blood Group Dropdown */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Blood Group</Text>
+        <Text style={styles.label}>{t('Blood Group')}</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => {
@@ -682,7 +690,7 @@ const CandidateForm = ({
                 : styles.placeholderText
             }
           >
-            {formData.blood_group ? formData.blood_group : 'Select Blood Group'}
+            {formData.blood_group ? formData.blood_group : t('select') + ' ' + t('Blood Group')}
           </Text>
           <Text style={styles.dropdownArrow}>
             {showBloodGroupDropdown ? '▲' : '▼'}
@@ -699,10 +707,11 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Aadhar Card Number</Text>
+        <Text style={styles.label}>{t('Aadhar Card No')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your valid Aadhar Card Number"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('your') + ' ' + t('valid') + ' ' + t('aadhar_card_number')}
           keyboardType="numeric"
           value={formData.aadhar_no}
           onChangeText={text => onInputChange('aadhar_no', text)}
@@ -711,10 +720,11 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Pan Card Number</Text>
+        <Text style={styles.label}>{t('Pan Card No')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your valid Pan Card Number"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('your') + ' ' + t('valid') + ' ' + t('pan_card_number')}
           value={formData.pancard_no}
           onChangeText={text => onInputChange('pancard_no', text)}
           maxLength={10}
@@ -723,14 +733,15 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Mobile number *</Text>
+        <Text style={styles.label}>{t('mobile_number')} *</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter your mobile number"
+            placeholderTextColor={globalColors.mauve}
+            placeholder={t('enter') + ' ' + t('your') + ' ' + t('mobile_number')}
             keyboardType="phone-pad"
             value={formData.phone}
             onChangeText={text => onInputChange('phone', text)}
@@ -740,14 +751,15 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Alternate Contact No</Text>
+        <Text style={styles.label}>{t('alternate_contact_number')}</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter alternate contact number"
+            placeholderTextColor={globalColors.mauve}
+            placeholder={t('enter') + ' ' + t('alternate_contact_number')}
             keyboardType="phone-pad"
             value={formData.contact_number_2}
             onChangeText={text => onInputChange('contact_number_2', text)}
@@ -757,20 +769,22 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Profession</Text>
+        <Text style={styles.label}>{t('Profession')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter your profession"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('your') + ' ' + t('profession')}
           value={formData.profession}
           onChangeText={text => onInputChange('profession', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Description</Text>
+        <Text style={styles.label}>{t('description')}</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
-          placeholder="Enter description"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('description')}
           value={formData.description}
           onChangeText={text => onInputChange('description', text)}
           multiline
@@ -779,23 +793,25 @@ const CandidateForm = ({
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Address Details</Text>
+      <Text style={styles.sectionTitle}>{t('address_details')}</Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Address Line 1</Text>
+        <Text style={styles.label}>{t('Address Line 1')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter address line 1"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('Address Line 1')}
           value={formData.address_line_1}
           onChangeText={text => onInputChange('address_line_1', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Address Line 2</Text>
+        <Text style={styles.label}>{t('Address Line 2')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter address line 2"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('Address Line 2')}
           value={formData.address_line_2}
           onChangeText={text => onInputChange('address_line_2', text)}
         />
@@ -823,23 +839,25 @@ const CandidateForm = ({
         getSelectedName={getSelectedName}
       />
 
-      <Text style={styles.sectionTitle}>Education Details</Text>
+      <Text style={styles.sectionTitle}>{t('Education')} {t('Details')}</Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>College Name</Text>
+        <Text style={styles.label}>{t('College Name')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter college name"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('College Name')}
           value={formData.college_name}
           onChangeText={text => onInputChange('college_name', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Passout Year</Text>
+        <Text style={styles.label}>{t('Passout Year YYYY')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter passout year"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('Passout Year YYYY')}
           keyboardType="numeric"
           value={formData.passout_year}
           onChangeText={text => onInputChange('passout_year', text)}
@@ -849,7 +867,7 @@ const CandidateForm = ({
 
       {/* Qualification Dropdown */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Qualification</Text>
+        <Text style={styles.label}>{t('qualification')}</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => {
@@ -871,7 +889,7 @@ const CandidateForm = ({
             {formData.qualification
               ? qualifications.find(q => q.value === formData.qualification)
                   ?.label
-              : 'Select Qualification'}
+              :  t("select") + " "+ t("qualification")}
           </Text>
           <Text style={styles.dropdownArrow}>
             {showQualificationDropdown ? '▲' : '▼'}
@@ -889,7 +907,7 @@ const CandidateForm = ({
 
       {/* Job Category Dropdown */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Job Category</Text>
+        <Text style={styles.label}>{t('Job Category')}</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => {
@@ -912,7 +930,7 @@ const CandidateForm = ({
               {formData.job_category
                 ? jobCategories.find(jc => jc.value === formData.job_category)
                     ?.label
-                : 'Select Job Category'}
+                : t('select') + ' ' + t('Job Category')}
             </Text>
             {loadingJobCategories && (
               <ActivityIndicator size="small" color={globalColors.mauve} />
@@ -934,7 +952,7 @@ const CandidateForm = ({
 
       {/* Skills Dropdown */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Skills</Text>
+        <Text style={styles.label}>{t('Skills')}</Text>
         <TouchableOpacity
           style={[
             styles.dropdownButton,
@@ -960,7 +978,7 @@ const CandidateForm = ({
             >
               {formData.skills
                 ? `${formData.skills.split(',').length} skill(s) selected`
-                : formData.job_category ? 'Select Skills' : 'Select Job Category First'}
+                : formData.job_category ? 'Select Skills' : t("select_job_category_first")}
             </Text>
             {loadingSkills && (
               <ActivityIndicator size="small" color={globalColors.mauve} />
@@ -982,10 +1000,11 @@ const CandidateForm = ({
 
       <View style={styles.row}>
         <View style={[styles.inputContainer, styles.halfInput]}>
-          <Text style={styles.label}>Minimum Experience</Text>
+          <Text style={styles.label}>{t('min years')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Min years"
+            placeholderTextColor={globalColors.mauve}
+            placeholder={t('min years')}
             keyboardType="numeric"
             value={formData.min_experience}
             onChangeText={text => onInputChange('min_experience', text)}
@@ -993,10 +1012,11 @@ const CandidateForm = ({
         </View>
 
         <View style={[styles.inputContainer, styles.halfInput]}>
-          <Text style={styles.label}>Maximum Experience</Text>
+          <Text style={styles.label}>{t('max years')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Max years"
+            placeholderTextColor={globalColors.mauve}
+            placeholder={t('max years')}
             keyboardType="numeric"
             value={formData.max_experience}
             onChangeText={text => onInputChange('max_experience', text)}
@@ -1005,10 +1025,11 @@ const CandidateForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Job Location</Text>
+        <Text style={styles.label}>{t('Job Location')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter preferred job location"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter') + ' ' + t('preferred') + ' ' + t('Job Location')}
           value={formData.job_location}
           onChangeText={text => onInputChange('job_location', text)}
         />
@@ -1016,7 +1037,7 @@ const CandidateForm = ({
 
       {/* Resume Upload using DocumentUpload Component */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Resume Upload *</Text>
+        <Text style={styles.label}>{t('resume_upload')}*</Text>
         <DocumentUpload 
           type="Upload Resume" 
           onUploadComplete={(fileInfo) => {
@@ -1055,7 +1076,7 @@ const CandidateForm = ({
 
       {/* Profile Photo Upload */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Profile Photo Upload</Text>
+        <Text style={styles.label}>{t('profile_photo_upload')}</Text>
         <TouchableOpacity
           style={styles.fileUploadButton}
           onPress={() => onImagePicker('profile')}
@@ -1094,7 +1115,7 @@ const CandidateForm = ({
           {isLoading ? (
             <ActivityIndicator color={globalColors.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Register as Candidate</Text>
+            <Text style={styles.submitButtonText}>{t('register_as_candidate')}</Text>
           )}
         </LinearGradient>
       </TouchableOpacity>

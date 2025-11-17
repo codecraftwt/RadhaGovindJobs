@@ -18,6 +18,7 @@ import LocationFields from './LocationFields';
 import { validateForm } from './validations';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
 
 
 const ConsultantForm = ({
@@ -48,6 +49,7 @@ const ConsultantForm = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
 
@@ -78,7 +80,7 @@ const ConsultantForm = ({
       const formDataToSend = new FormData();
 
       // Add all fields according to the curl example structure
-      formDataToSend.append('role_id', '3'); // Consultant role (assuming 3 is for consultants)
+      formDataToSend.append('role_id', '4'); // Consultant role (assuming 3 is for consultants)
       formDataToSend.append('fname', formData.name); // Using name as fname
       formDataToSend.append('lname', " lname"); 
       formDataToSend.append('middle_name', " middle_name"); 
@@ -162,21 +164,23 @@ const ConsultantForm = ({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <Text style={styles.formTitle}>Consultant Registration</Text>
+      <Text style={styles.formTitle}>{t('consultant')} {t('Registration')}</Text>
       
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Consultant name *</Text>
+        <Text style={styles.label}>{t('consultant')} {t('name')} *</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter Your Full Name"
+          placeholderTextColor={globalColors.mauve}
+          placeholder={t('enter_full_name')}
           value={formData.name}
           onChangeText={(text) => onInputChange('name', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email Id *</Text>
+        <Text style={styles.label}>{t('Email')} {t('Id')} *</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="test.consultant@gmail.com"
           keyboardType="email-address"
@@ -188,9 +192,10 @@ const ConsultantForm = ({
 
     {/* Password Field - Fixed */}
     <View style={styles.inputContainer}>
-      <Text style={styles.label}>Password *</Text>
+      <Text style={styles.label}>{t('Password')} *</Text>
       <View style={styles.passwordInputContainer}>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="••••••"
           secureTextEntry={!showPassword}
@@ -212,9 +217,10 @@ const ConsultantForm = ({
 
     {/* Confirm Password Field - Fixed */}
     <View style={styles.inputContainer}>
-      <Text style={styles.label}>Confirm Password *</Text>
+      <Text style={styles.label}>{t('confirm_password')} *</Text>
       <View style={styles.passwordInputContainer}>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="••••••"
           secureTextEntry={!showConfirmPassword}
@@ -232,11 +238,11 @@ const ConsultantForm = ({
           />
         </TouchableOpacity>
       </View>
-      <Text style={styles.hintText}>(Minimum 6 characters)</Text>
+      <Text style={styles.hintText}>{t('minimum_characters')}</Text>
     </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Established Date</Text>
+        <Text style={styles.label}>{t('established_date')}</Text>
         <TouchableOpacity
           style={styles.datePickerButton}
           onPress={() => showDatePickerModal('established_date')}
@@ -248,14 +254,15 @@ const ConsultantForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Mobile number *</Text>
+        <Text style={styles.label}>{t('mobile_number')} *</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
+          placeholderTextColor={globalColors.mauve}
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter your mobile number"
+            placeholder={t('enter') + ' ' + t('your') + ' ' + t('mobile_number')}
             keyboardType="phone-pad"
             value={formData.phone}
             onChangeText={(text) => onInputChange('phone', text)}
@@ -265,14 +272,15 @@ const ConsultantForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Alternate Contact No</Text>
+        <Text style={styles.label}>{t('alternate_contact_number')}</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
+          placeholderTextColor={globalColors.mauve}
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter alternate contact number"
+            placeholder={t('enter') + ' ' + t('alternate_contact_number')}
             keyboardType="phone-pad"
             value={formData.contact_number_2}
             onChangeText={(text) => onInputChange('contact_number_2', text)}
@@ -281,23 +289,25 @@ const ConsultantForm = ({
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Address Details</Text>
+      <Text style={styles.sectionTitle}>{t('address_details')}</Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Address Line 1</Text>
+        <Text style={styles.label}>{t('Address Line 1')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter address line 1"
+          placeholder={t('enter') + ' ' + t('Address Line 1')}
           value={formData.address_line_1}
           onChangeText={(text) => onInputChange('address_line_1', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Address Line 2</Text>
+        <Text style={styles.label}>{t('Address Line 2')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter address line 2"
+          placeholder={t('enter') + ' ' + t('Address Line 2')}
           value={formData.address_line_2}
           onChangeText={(text) => onInputChange('address_line_2', text)}
         />
@@ -326,10 +336,11 @@ const ConsultantForm = ({
       />
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Website Url</Text>
+        <Text style={styles.label}>{t('website_url')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter website URL"
+          placeholder={t('enter') + ' ' + t('website_url')}
           keyboardType="url"
           autoCapitalize="none"
           value={formData.website_url}
@@ -338,10 +349,11 @@ const ConsultantForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>GST No</Text>
+        <Text style={styles.label}>{t('gst_no')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter GST number"
+          placeholder={t('enter') + ' ' + t('gst_no')}
           value={formData.gst_no}
           onChangeText={(text) => onInputChange('gst_no', text)}
           maxLength={15}
@@ -349,10 +361,11 @@ const ConsultantForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Description</Text>
+        <Text style={styles.label}>{t('description')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={[styles.input, styles.textArea]}
-          placeholder="Enter consultant description"
+          placeholder={t('enter') + ' ' + t('consultant') + ' ' + t('description')}
           value={formData.description}
           onChangeText={(text) => onInputChange('description', text)}
           multiline
@@ -362,7 +375,7 @@ const ConsultantForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Profile logo</Text>
+        <Text style={styles.label}>{t('profile_logo')}</Text>
         <TouchableOpacity 
           style={styles.fileUploadButton}
           onPress={() => onImagePicker('profile_logo')}
@@ -399,7 +412,7 @@ const ConsultantForm = ({
           {isSubmitLoading ? (
             <ActivityIndicator color={globalColors.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Register as Consultant</Text>
+            <Text style={styles.submitButtonText}>{t('register_as_consultant')}</Text>
           )}
         </LinearGradient>
       </TouchableOpacity>

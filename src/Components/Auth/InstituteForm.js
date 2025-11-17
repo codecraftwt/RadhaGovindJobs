@@ -18,6 +18,7 @@ import LocationFields from './LocationFields';
 import { validateForm } from './validations';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
 
 
 const InstituteForm = ({
@@ -48,6 +49,7 @@ const InstituteForm = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
 
@@ -182,21 +184,23 @@ const InstituteForm = ({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <Text style={styles.formTitle}>Institute Registration</Text>
+      <Text style={styles.formTitle}>{t('Institute')} {t('Registration')}</Text>
       
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Institute name *</Text>
+        <Text style={styles.label}>{t('Institute')} {t('name')} *</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter Your Full Name"
+          placeholder={t('enter_full_name')}
           value={formData.name}
           onChangeText={(text) => onInputChange('name', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email Id *</Text>
+        <Text style={styles.label}>{t('Email')} {t('Id')} *</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="test.institute@gmail.com"
           keyboardType="email-address"
@@ -207,9 +211,10 @@ const InstituteForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Password *</Text>
+        <Text style={styles.label}>{t('Password')} *</Text>
       <View style={styles.passwordInputContainer}>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="••••••"
           secureTextEntry={!showPassword}
@@ -231,9 +236,10 @@ const InstituteForm = ({
 
     {/* Confirm Password Field - Fixed */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Confirm Password *</Text>
+        <Text style={styles.label}>{t('confirm_password')} *</Text>
       <View style={styles.passwordInputContainer}>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
           placeholder="••••••"
           secureTextEntry={!showConfirmPassword}
@@ -251,21 +257,22 @@ const InstituteForm = ({
           />
         </TouchableOpacity>
       </View>
-        <Text style={styles.hintText}>(Minimum 6 characters)</Text>
+        <Text style={styles.hintText}>{t('minimum_characters')}</Text>
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Head of Institute *</Text>
+        <Text style={styles.label}>{t('head_of_institute')} *</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter Name"
+          placeholder={t('head_of_institute')}
           value={formData.head_of_institute}
           onChangeText={(text) => onInputChange('head_of_institute', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Established Date</Text>
+        <Text style={styles.label}>{t('established_date')}</Text>
         <TouchableOpacity
           style={styles.datePickerButton}
           onPress={() => showDatePickerModal('established_date')}
@@ -277,24 +284,26 @@ const InstituteForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Approval ID *</Text>
+        <Text style={styles.label}>{t('approval_id')} *</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter Approval ID"
+          placeholder={t('enter') + ' ' + t('approval_id')}
           value={formData.approval_id}
           onChangeText={(text) => onInputChange('approval_id', text)}
         />
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Mobile number *</Text>
+        <Text style={styles.label}>{t('mobile_number')}  *</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
+          placeholderTextColor={globalColors.mauve}
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter your mobile number"
+            placeholder={t('enter') + ' ' + t('your') + ' ' + t('mobile_number')}
             keyboardType="phone-pad"
             value={formData.phone}
             onChangeText={(text) => onInputChange('phone', text)}
@@ -304,14 +313,15 @@ const InstituteForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Alternate Contact No</Text>
+        <Text style={styles.label}>{t('alternate_contact_number')}</Text>
         <View style={styles.phoneContainer}>
           <View style={styles.countryCode}>
             <Text style={styles.countryCodeText}>+91</Text>
           </View>
           <TextInput
+          placeholderTextColor={globalColors.mauve}
             style={[styles.input, styles.phoneInput]}
-            placeholder="Enter your mobile number"
+            placeholder={t('enter') + ' ' + t('alternate_contact_number')}
             keyboardType="phone-pad"
             value={formData.contact_number_2}
             onChangeText={(text) => onInputChange('contact_number_2', text)}
@@ -321,36 +331,38 @@ const InstituteForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Institute Type</Text>
+        <Text style={styles.label}>{t('institute_type')}</Text>
         <TouchableOpacity
           style={styles.dropdownButton}
           onPress={() => {/* Implement institute type dropdown */}}
         >
           <Text style={formData.institute_type ? styles.selectedText : styles.placeholderText}>
-            {formData.institute_type || 'Select Institute Type'}
+            {formData.institute_type || t('select') + ' ' + t('institute_type')}
           </Text>
           <Text style={styles.dropdownArrow}>▼</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>No of Students</Text>
+        <Text style={styles.label}>{t('no_of_students')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter Total Students NO"
+          placeholder={t('enter') + ' ' + t('no_of_students')}
           keyboardType="numeric"
           value={formData.no_of_students}
           onChangeText={(text) => onInputChange('no_of_students', text)}
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Address Details</Text>
+      <Text style={styles.sectionTitle}>{t('address_details')}</Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Address Line 1</Text>
+        <Text style={styles.label}>{t('Address Line 1')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter address line 1"
+          placeholder={t('enter') + ' ' + t('Address Line 1')}
           value={formData.address_line_1}
           onChangeText={(text) => onInputChange('address_line_1', text)}
         />
@@ -379,10 +391,11 @@ const InstituteForm = ({
       />
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Website Url</Text>
+        <Text style={styles.label}>{t('website_url')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter your website link"
+          placeholder={t('enter') + ' ' + t('website_url')}
           keyboardType="url"
           autoCapitalize="none"
           value={formData.website_url}
@@ -391,10 +404,11 @@ const InstituteForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>GST No</Text>
+        <Text style={styles.label}>{t('gst_no')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={styles.input}
-          placeholder="Enter your GST No"
+          placeholder={t('enter') + ' ' + t('gst_no')}
           value={formData.gst_no}
           onChangeText={(text) => onInputChange('gst_no', text)}
           maxLength={15}
@@ -402,7 +416,7 @@ const InstituteForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Profile logo</Text>
+        <Text style={styles.label}>{t('profile_logo')}</Text>
         <TouchableOpacity 
           style={styles.fileUploadButton}
           onPress={() => onImagePicker('profile_logo')}
@@ -426,10 +440,11 @@ const InstituteForm = ({
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Description</Text>
+        <Text style={styles.label}>{t('description')}</Text>
         <TextInput
+        placeholderTextColor={globalColors.mauve}
           style={[styles.input, styles.textArea]}
-          placeholder="Enter institute description"
+          placeholder={t('enter') + ' ' + t('Institute') + ' ' + t('description')}
           value={formData.description}
           onChangeText={(text) => onInputChange('description', text)}
           multiline
@@ -452,7 +467,7 @@ const InstituteForm = ({
           {isSubmitLoading ? (
             <ActivityIndicator color={globalColors.white} />
           ) : (
-            <Text style={styles.submitButtonText}>Register as Institute</Text>
+            <Text style={styles.submitButtonText}>{t("register_as_institute")}</Text>
           )}
         </LinearGradient>
       </TouchableOpacity>

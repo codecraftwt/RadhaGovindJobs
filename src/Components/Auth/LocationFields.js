@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { globalColors } from '../../Theme/globalColors';
 import { h, w, f } from 'walstar-rn-responsive';
+import {useTranslation} from 'react-i18next';
 
 const LocationFields = ({
   formData,
@@ -32,6 +33,8 @@ const LocationFields = ({
   onMeasureDropdown,
   getSelectedName,
 }) => {
+
+  const {t} = useTranslation();
   
   const renderDropdownModal = (type, visible, data, onSelect, selectedId) => {
     return (
@@ -130,7 +133,7 @@ const LocationFields = ({
           <Text style={
             value ? styles.selectedText : styles.placeholderText
           }>
-            {value ? getSelectedName(type, value) : `Select ${label}`}
+            {value ? getSelectedName(type, value) : ` ${label}`}
           </Text>
           <View style={styles.dropdownRight}>
             {loading ? (
@@ -164,7 +167,7 @@ const LocationFields = ({
       {/* State Selection */}
       {renderLocationField(
         'state',
-        'State',
+        t("Select State"),
         formData.state_id,
         states,
         showStateList,
@@ -175,7 +178,7 @@ const LocationFields = ({
       {/* District Selection */}
       {renderLocationField(
         'district',
-        'District',
+        t("Select district"),
         formData.district_id,
         districts,
         showDistrictList,
@@ -186,7 +189,7 @@ const LocationFields = ({
       {/* Taluka Selection */}
       {renderLocationField(
         'taluka',
-        'Taluka',
+        t("Search Taluka"),
         formData.taluka_id,
         talukas,
         showTalukaList,
@@ -197,7 +200,7 @@ const LocationFields = ({
       {/* Village Selection */}
       {renderLocationField(
         'village',
-        'Village',
+       t("Select village"),
         formData.village_id,
         villages,
         showVillageList,
@@ -207,11 +210,12 @@ const LocationFields = ({
 
       {/* Zipcode - Auto-filled */}
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Zipcode *</Text>
+        <Text style={styles.label}>{t("Zipcode")} *</Text>
         <View style={styles.zipcodeContainer}>
           <TextInput
             style={[styles.input, styles.zipcodeInput]}
-            placeholder="Zipcode will be auto-filled"
+            placeholderTextColor={globalColors.mauve}
+            placeholder={t("Zipcode")}
             keyboardType="numeric"
             value={formData.zipcode}
             onChangeText={(text) => onInputChange('zipcode', text)}
