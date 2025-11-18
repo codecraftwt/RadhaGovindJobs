@@ -1,0 +1,790 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Modal,
+} from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import LinearGradient from 'react-native-linear-gradient';
+import { globalColors } from '../../Theme/globalColors';
+import { h, w, f } from 'walstar-rn-responsive';
+import LocationFields from './LocationFields';
+import { validateForm } from './validations';
+import { useNavigation } from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
+
+const EmployerForm = ({
+  formData,
+  loadingStates,
+  states,
+  districts,
+  talukas,
+  villages,
+  showStateList,
+  showDistrictList,
+  showTalukaList,
+  showVillageList,
+  onInputChange,
+  onFetchDistricts,
+  onFetchTalukas,
+  onFetchVillages,
+  onFetchZipcode,
+  onToggleDropdown,
+  onMeasureDropdown,
+  getSelectedName,
+  onImagePicker,
+  isLoading,
+}) => {
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dateField, setDateField] = useState('');
+  const [apiLoading, setApiLoading] = useState(false);
+  const [showSectorDropdown, setShowSectorDropdown] = useState(false);
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const navigation = useNavigation();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { t } = useTranslation();
+
+  const API_BASE_URL = 'https://gramjob.walstarmedia.com/api';
+
+  const companySectors = [
+    { id: 1, name: 'IT & Software' },
+    { id: 2, name: 'Manufacturing' },
+    { id: 3, name: 'Healthcare' },
+    { id: 4, name: 'Education' },
+    { id: 5, name: 'Finance' },
+    { id: 6, name: 'Retail' },
+    { id: 7, name: 'Construction' },
+  ];
+
+  const companyTypes = [
+    { id: 1, name: 'Private Limited' },
+    { id: 2, name: 'Public Limited' },
+    { id: 3, name: 'Partnership' },
+    { id: 4, name: 'Proprietorship' },
+    { id: 5, name: 'LLP' },
+  ];
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const handleSubmit = async () => {
+    const errors = validateForm(formData, 'employer');
+    
+    if (Object.keys(errors).length > 0) {
+      Alert.alert('Validation Error', Object.values(errors).join('\n'));
+      return;
+    }
+
+    await registerEmployer();
+  };
+
+  const registerEmployer = async () => {
+    try {
+      setApiLoading(true);
+
+      // Prepare form data according to the API requirements
+      const formDataToSend = new FormData();
+
+      // Add all fields according to the API structure
+      formDataToSend.append('role_id', '3'); // Employer role ID
+      formDataToSend.append('fname', formData.name); // Using employer name as fname
+      formDataToSend.append('lname', "Employer"); // Default lname
+      formDataToSend.append('middle_name', " middle_name"); // Empty middle name
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('contact_number_1', formData.phone);
+      
+      // Employer specific fields
+      formDataToSend.append('established_date', formData.established_date || '');
+      formDataToSend.append('company_sector', formData.company_sector || '');
+      formDataToSend.append('company_sector_id', formData.company_sector_id || '');
+      formDataToSend.append('company_type', formData.company_type || '');
+      formDataToSend.append('company_type_id', formData.company_type_id || '');
+      
+      // Address fields
+      formDataToSend.append('address_line_1', formData.address_line_1 || '');
+      formDataToSend.append('address_line_2', formData.address_line_2 || '');
+      formDataToSend.append('state_id', formData.state_id?.toString() || '');
+      formDataToSend.append('district_id', formData.district_id?.toString() || '');
+      formDataToSend.append('taluka_id', formData.taluka_id?.toString() || '');
+      formDataToSend.append('village_id', formData.village_id?.toString() || '');
+      formDataToSend.append('zipcode', formData.zipcode || '');
+
+      // Additional fields
+      formDataToSend.append('contact_number_2', formData.contact_number_2 || '');
+      formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('website_url', formData.website_url || '');
+      formDataToSend.append('gst_no', formData.gst_no || '');
+
+      // File uploads
+      if (formData.profile_logo && formData.profile_logo.path) {
+        formDataToSend.append('profile', {
+          uri: formData.profile_logo.path,
+          type: formData.profile_logo.type || 'image/jpeg',
+          name: formData.profile_logo.filename || 'profile_logo.jpg'
+        });
+      }
+
+      console.log('Sending employer registration data...');
+
+      const response = await fetch(`${API_BASE_URL}/registration`, {
+        method: 'POST',
+        body: formDataToSend,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const responseData = await response.json();
+      console.log("Registration response:", responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      if (responseData.status) {
+        Alert.alert('Success', 'Employer registration successful!');
+        navigation.navigate('Login');
+        console.log('Registration successful:', responseData);
+      } else {
+        throw new Error(responseData.message || 'Registration failed');
+      }
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Error', error.message || 'Registration failed. Please try again.');
+    } finally {
+      setApiLoading(false);
+    }
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      onInputChange(dateField, formattedDate);
+    }
+  };
+
+  const showDatePickerModal = (field) => {
+    setDateField(field);
+    setShowDatePicker(true);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'dd-mm-yyyy';
+    return new Date(dateString).toLocaleDateString('en-IN');
+  };
+
+  const handleSectorSelect = (sector) => {
+    onInputChange('company_sector', sector.name);
+    onInputChange('company_sector_id', sector.id.toString());
+    setShowSectorDropdown(false);
+  };
+
+  const handleTypeSelect = (type) => {
+    onInputChange('company_type', type.name);
+    onInputChange('company_type_id', type.id.toString());
+    setShowTypeDropdown(false);
+  };
+
+  const renderDropdownModal = (visible, data, onSelect, selectedValue, type) => {
+    return (
+      <Modal
+        visible={visible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => {
+          if (type === 'sector') setShowSectorDropdown(false);
+          if (type === 'type') setShowTypeDropdown(false);
+        }}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => {
+            if (type === 'sector') setShowSectorDropdown(false);
+            if (type === 'type') setShowTypeDropdown(false);
+          }}
+        >
+          <View style={styles.centeredModalContainer}>
+            <View style={styles.centeredModalContent}>
+              <ScrollView
+                style={styles.modalScrollView}
+                nestedScrollEnabled={true}
+                showsVerticalScrollIndicator={true}
+              >
+                {data.map(item => {
+                  const isSelected = selectedValue === item.name;
+
+                  return (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[
+                        styles.modalDropdownItem,
+                        isSelected && styles.selectedDropdownItem,
+                      ]}
+                      onPress={() => {
+                        onSelect(item);
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.modalDropdownItemText,
+                          isSelected && styles.selectedDropdownItemText,
+                        ]}
+                      >
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
+
+  const isSubmitLoading = isLoading || apiLoading;
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <Text style={styles.formTitle}>{t('employee')} {t('Registration')}</Text>
+      
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('employee')} {t('name')} *</Text>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder={t('enter_full_name')}
+          value={formData.name}
+          onChangeText={(text) => onInputChange('name', text)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('Email')} {t('Id')} *</Text>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder="test.employer@gmail.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={formData.email}
+          onChangeText={(text) => onInputChange('email', text)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('Password')} *</Text>
+      <View style={styles.passwordInputContainer}>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder="••••••"
+          secureTextEntry={!showPassword}
+          value={formData.password}
+          onChangeText={(text) => onInputChange('password', text)}
+        />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={togglePasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('confirm_password')} *</Text>
+      <View style={styles.passwordInputContainer}>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder="••••••"
+          secureTextEntry={!showConfirmPassword}
+          value={formData.confirm_password}
+          onChangeText={(text) => onInputChange('confirm_password', text)}
+        />
+        <TouchableOpacity 
+          style={styles.eyeIcon}
+          onPress={toggleConfirmPasswordVisibility}
+        >
+          <MaterialCommunityIcons
+            name={showConfirmPassword ? 'eye' : 'eye-off'}
+            size={w(5.5)}
+            color={globalColors.mauve}
+          />
+        </TouchableOpacity>
+      </View>
+        <Text style={styles.hintText}>{t('minimum_characters')}</Text>
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('established_date')}</Text>
+        <TouchableOpacity
+          style={styles.datePickerButton}
+          onPress={() => showDatePickerModal('established_date')}
+        >
+          <Text style={formData.established_date ? styles.selectedText : styles.placeholderText}>
+            {formatDate(formData.established_date)}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('company_sector')}</Text>
+        <TouchableOpacity
+          style={styles.dropdownButton}
+          onPress={() => {
+            setShowSectorDropdown(!showSectorDropdown);
+            setShowTypeDropdown(false);
+          }}
+        >
+          <Text style={formData.company_sector ? styles.selectedText : styles.placeholderText}>
+            {formData.company_sector || t("select") + " " + t("company_sector")}
+          </Text>
+          <Text style={styles.dropdownArrow}>
+            {showSectorDropdown ? '▲' : '▼'}
+          </Text>
+        </TouchableOpacity>
+
+        {renderDropdownModal(
+          showSectorDropdown,
+          companySectors,
+          handleSectorSelect,
+          formData.company_sector,
+          'sector'
+        )}
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('company_type')}</Text>
+        <TouchableOpacity
+          style={styles.dropdownButton}
+          onPress={() => {
+            setShowTypeDropdown(!showTypeDropdown);
+            setShowSectorDropdown(false);
+          }}
+        >
+          <Text style={formData.company_type ? styles.selectedText : styles.placeholderText}>
+            {formData.company_type ||  t("select") + " " + t("company_type")}
+          </Text>
+          <Text style={styles.dropdownArrow}>
+            {showTypeDropdown ? '▲' : '▼'}
+          </Text>
+        </TouchableOpacity>
+
+        {renderDropdownModal(
+          showTypeDropdown,
+          companyTypes,
+          handleTypeSelect,
+          formData.company_type,
+          'type'
+        )}
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('mobile_number')} *</Text>
+        <View style={styles.phoneContainer}>
+          <View style={styles.countryCode}>
+            <Text style={styles.countryCodeText}>+91</Text>
+          </View>
+          <TextInput
+          placeholderTextColor={globalColors.mauve}
+            style={[styles.input, styles.phoneInput]}
+            placeholder={t('enter') + ' ' + t('your') + ' ' + t('mobile_number')}
+            keyboardType="phone-pad"
+            value={formData.phone}
+            onChangeText={(text) => onInputChange('phone', text)}
+            maxLength={10}
+          />
+        </View>
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('alternate_contact_number')}</Text>
+        <View style={styles.phoneContainer}>
+          <View style={styles.countryCode}>
+            <Text style={styles.countryCodeText}>+91</Text>
+          </View>
+          <TextInput
+          placeholderTextColor={globalColors.mauve}
+            style={[styles.input, styles.phoneInput]}
+            placeholder={t('enter') + ' ' + t('alternate_contact_number')}
+            keyboardType="phone-pad"
+            value={formData.contact_number_2}
+            onChangeText={(text) => onInputChange('contact_number_2', text)}
+            maxLength={10}
+          />
+        </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>{t('address_details')}</Text>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('Address Line 1')}</Text>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder={t('enter') + ' ' + t('Address Line 1')}
+          value={formData.address_line_1}
+          onChangeText={(text) => onInputChange('address_line_1', text)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('Address Line 2')}</Text>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder={t('enter') + ' ' + t('Address Line 2')}
+          value={formData.address_line_2}
+          onChangeText={(text) => onInputChange('address_line_2', text)}
+        />
+      </View>
+
+      {/* Location Fields */}
+      <LocationFields
+        formData={formData}
+        loadingStates={loadingStates}
+        states={states}
+        districts={districts}
+        talukas={talukas}
+        villages={villages}
+        showStateList={showStateList}
+        showDistrictList={showDistrictList}
+        showTalukaList={showTalukaList}
+        showVillageList={showVillageList}
+        onInputChange={onInputChange}
+        onFetchDistricts={onFetchDistricts}
+        onFetchTalukas={onFetchTalukas}
+        onFetchVillages={onFetchVillages}
+        onFetchZipcode={onFetchZipcode}
+        onToggleDropdown={onToggleDropdown}
+        onMeasureDropdown={onMeasureDropdown}
+        getSelectedName={getSelectedName}
+      />
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('website_url')}</Text>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder={t('enter') + ' ' + t('website_url')}
+          keyboardType="url"
+          autoCapitalize="none"
+          value={formData.website_url}
+          onChangeText={(text) => onInputChange('website_url', text)}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('gst_no')}</Text>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={styles.input}
+          placeholder={t('enter') + ' ' + t('gst_no')}
+          value={formData.gst_no}
+          onChangeText={(text) => onInputChange('gst_no', text)}
+          maxLength={15}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('profile_logo')}</Text>
+        <TouchableOpacity 
+          style={styles.fileUploadButton}
+          onPress={() => onImagePicker('profile_logo')}
+        >
+          <Text style={styles.fileUploadText}>
+            {formData.profile_logo ? formData.profile_logo.filename || 'Logo selected' : 'No file chosen'}
+          </Text>
+        </TouchableOpacity>
+        {formData.profile_logo && (
+          <View style={styles.imagePreviewContainer}>
+            <Image
+              source={{ uri: formData.profile_logo.path }}
+              style={styles.imagePreview}
+              resizeMode="cover"
+            />
+            <Text style={styles.fileInfoText}>
+              {formData.profile_logo.filename} ({(formData.profile_logo.size / 1024).toFixed(1)} KB)
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>{t('description')}</Text>
+        <TextInput
+        placeholderTextColor={globalColors.mauve}
+          style={[styles.input, styles.textArea]}
+          placeholder={t('enter') + ' ' + t('company') + ' ' + t('description')}
+          value={formData.description}
+          onChangeText={(text) => onInputChange('description', text)}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="top"
+        />
+      </View>
+
+      <TouchableOpacity 
+        style={styles.submitButton}
+        onPress={handleSubmit}
+        disabled={isSubmitLoading}
+      >
+        <LinearGradient
+          colors={[globalColors.purplegradient1, globalColors.purplegradient2]}
+          style={styles.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          {isSubmitLoading ? (
+            <ActivityIndicator color={globalColors.white} />
+          ) : (
+            <Text style={styles.submitButtonText}>{t('register_as_employer')}</Text>
+          )}
+        </LinearGradient>
+      </TouchableOpacity>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={formData.established_date ? new Date(formData.established_date) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+          maximumDate={new Date()}
+        />
+      )}
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  formTitle: {
+    fontSize: f(3),
+    fontFamily: 'BaiJamjuree-SemiBold',
+    textAlign: 'center',
+    marginBottom: h(3),
+    color: globalColors.black,
+  },
+  sectionTitle: {
+    fontSize: f(2.2),
+    fontFamily: 'BaiJamjuree-SemiBold',
+    color: globalColors.black,
+    marginTop: h(2),
+    marginBottom: h(1),
+    paddingLeft: w(1),
+  },
+  inputContainer: {
+    marginBottom: h(1.5),
+  },
+  label: {
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.7),
+    color: globalColors.black,
+    marginBottom: h(0.5),
+    marginLeft: w(1),
+  },
+  input: {
+    backgroundColor: globalColors.lavender,
+    padding: h(1.5),
+    borderRadius: h(0.8),
+    borderWidth: 2,
+    borderColor: globalColors.lightpink,
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.9),
+    color: globalColors.black,
+  },
+  passwordInputContainer: {
+    position: 'relative',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: w(4),
+    top: h(1.5),
+    zIndex: 1,
+  },
+  eyeText: {
+    fontSize: 18,
+  },
+  textArea: {
+    minHeight: h(10),
+    textAlignVertical: 'top',
+  },
+  hintText: {
+    fontFamily: 'BaiJamjuree-Regular',
+    fontSize: f(1.5),
+    color: globalColors.mauve,
+    marginTop: h(0.5),
+    marginLeft: w(1),
+  },
+  datePickerButton: {
+    backgroundColor: globalColors.lavender,
+    padding: h(1.5),
+    borderRadius: h(0.8),
+    borderWidth: 2,
+    borderColor: globalColors.lightpink,
+    justifyContent: 'center',
+  },
+  dropdownButton: {
+    backgroundColor: globalColors.lavender,
+    padding: h(1.5),
+    borderRadius: h(0.8),
+    borderWidth: 2,
+    borderColor: globalColors.lightpink,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  selectedText: {
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.9),
+    color: globalColors.black,
+  },
+  placeholderText: {
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.9),
+    color: globalColors.mauve,
+  },
+  dropdownArrow: {
+    fontSize: f(1.8),
+    color: globalColors.mauve,
+  },
+  phoneContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  countryCode: {
+    backgroundColor: globalColors.lavender,
+    padding: h(1.5),
+    borderTopLeftRadius: h(0.8),
+    borderBottomLeftRadius: h(0.8),
+    borderWidth: 2,
+    borderRightWidth: 0,
+    borderColor: globalColors.lightpink,
+    justifyContent: 'center',
+  },
+  countryCodeText: {
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.9),
+    color: globalColors.black,
+  },
+  phoneInput: {
+    flex: 1,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderLeftWidth: 0,
+  },
+  fileUploadButton: {
+    backgroundColor: globalColors.lavender,
+    padding: h(1.5),
+    borderRadius: h(0.8),
+    borderWidth: 2,
+    borderColor: globalColors.lightpink,
+    borderStyle: 'dashed',
+  },
+  fileUploadText: {
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.9),
+    color: globalColors.mauve,
+    textAlign: 'center',
+  },
+  fileInfoText: {
+    fontFamily: 'BaiJamjuree-Regular',
+    fontSize: f(1.4),
+    color: globalColors.mauve,
+    marginTop: h(0.5),
+    marginLeft: w(1),
+  },
+  imagePreviewContainer: {
+    alignItems: 'center',
+    marginTop: h(1),
+  },
+  imagePreview: {
+    width: w(15),
+    height: w(15),
+    borderRadius: w(2),
+    borderWidth: 2,
+    borderColor: globalColors.lightpink,
+  },
+  submitButton: {
+    borderRadius: h(0.8),
+    marginTop: h(2),
+    marginBottom: h(4),
+    overflow: 'hidden',
+  },
+  gradient: {
+    paddingVertical: h(1.5),
+    paddingHorizontal: w(4),
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: globalColors.white,
+    fontSize: f(2),
+    fontFamily: 'BaiJamjuree-SemiBold',
+  },
+  // Dropdown Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centeredModalContainer: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    overflow: 'hidden',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  centeredModalContent: {
+    maxHeight: 300,
+  },
+  modalScrollView: {
+    paddingVertical: 10,
+  },
+  modalDropdownItem: {
+    padding: h(1.5),
+    borderBottomWidth: 1,
+    borderBottomColor: globalColors.lightpink,
+  },
+  selectedDropdownItem: {
+    backgroundColor: globalColors.purplegradient1,
+  },
+  modalDropdownItemText: {
+    fontFamily: 'BaiJamjuree-SemiBold',
+    fontSize: f(1.8),
+    color: globalColors.black,
+  },
+  selectedDropdownItemText: {
+    color: globalColors.white,
+  },
+});
+
+export default EmployerForm;

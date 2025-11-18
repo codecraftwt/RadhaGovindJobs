@@ -5,6 +5,8 @@ import {
   Image,
   ScrollView,
   FlatList,
+  TouchableOpacity,
+  Alert,
 } from 'react-native';
 import React, { useEffect, useLayoutEffect } from 'react';
 import { globalColors } from '../../../Theme/globalColors';
@@ -18,8 +20,11 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCandidateDetails } from '../../../Redux/Slices/Candidateslice';
 import SkeltonLoader from '../../../Components/SkeltonLoader';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const CandidateDetails = ({route}) => {
+  const navigation = useNavigation();
   const {item:passeditem , goback} = route.params;
   const {t} = useTranslation();
   const dispatch = useDispatch();
@@ -145,6 +150,45 @@ const CandidateDetails = ({route}) => {
           <Text style={styles.subtitle}>{t("Skill")}</Text>
           <BulletpointContainer data={item?.skills} />
         </View> 
+
+        <View style={styles.aboutContainer}>
+          <Text style={styles.title}>{t("Resume")}</Text>
+          <TouchableOpacity
+            style={styles.viewResumeButton}
+            onPress={() => {
+              // Find the resume document from user documents
+              const resumeDocument = item?.user?.document?.find(
+                doc => doc.document_type === 'resume'
+              );
+              
+              if (resumeDocument) {
+                const resumeUrl = `https://gramjob.walstarmedia.com/${resumeDocument.document_file}`;
+                navigation.navigate('ResumeViewer', { 
+                  resumeUrl: resumeUrl,
+                  candidateName: `${item?.fname} ${item?.lname}`
+                });
+              } else {
+                Alert.alert('No Resume', 'No resume found for this candidate');
+              }
+            }}
+          >
+            <Text style={styles.viewResumeButtonText}>
+              {t('view_resume')}
+            </Text>
+            <MaterialCommunityIcons 
+              name="file-document-outline" 
+              size={w(5)} 
+              color={globalColors.white} 
+            />
+          </TouchableOpacity>
+          
+          {/* Show resume file info if available */}
+          {item?.user?.document?.find(doc => doc.document_type === 'resume') && (
+            <Text style={styles.resumeInfoText}>
+              {item.user.document.find(doc => doc.document_type === 'resume')?.document_file.split('/').pop()}
+            </Text>
+          )}
+        </View>
         </>}
       </ScrollView>
     </View>
@@ -221,6 +265,29 @@ const styles = StyleSheet.create({
     marginTop: w(1),
     alignItems: 'center',
     marginTop: w(-0.5),
+  },viewResumeButton: {
+  backgroundColor: globalColors.purplegradient1,
+  padding: h(1.5),
+  borderRadius: h(0.8),
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: w(2),
+  marginTop: h(1),
+},
+  viewResumeButtonText: {
+    color: globalColors.white,
+    fontSize: f(1.9),
+    fontFamily: 'BaiJamjuree-SemiBold',
+    textAlign: 'center',
+  },
+  resumeInfoText: {
+    fontFamily: 'BaiJamjuree-Medium',
+    color: globalColors.navypurple,
+    fontSize: f(1.4),
+    marginTop: h(0.5),
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
 
